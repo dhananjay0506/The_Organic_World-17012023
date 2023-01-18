@@ -110,7 +110,7 @@
                         <div class="col-12 col-md-6">
                             <div class="hs-unfold float-right col-6">
                                 <div class="dropdown">
-                                    <select name="order_status" onchange="order_status(this.value)"
+                                    {{-- <select name="order_status" onchange="order_status(this.value)"
                                             class="status form-control"
                                             data-id="{{$order['id']}}">
 
@@ -120,8 +120,8 @@
                                             value="confirmed" {{$order->order_status == 'confirmed'?'selected':''}} > {{\App\CPU\translate('Confirmed')}}</option>
                                         <option
                                             value="processing" {{$order->order_status == 'processing'?'selected':''}} >{{\App\CPU\translate('Processing')}} </option>
-                                        {{-- <option class="text-capitalize"
-                                                value="out_for_delivery" {{$order->order_status == 'out_for_delivery'?'selected':''}} >{{\App\CPU\translate('out_for_delivery')}} </option> --}}
+                                        <option class="text-capitalize"
+                                                value="out_for_delivery" {{$order->order_status == 'out_for_delivery'?'selected':''}} >{{\App\CPU\translate('out_for_delivery')}} </option>
                                         <option
                                             value="delivered" {{$order->order_status == 'delivered'?'selected':''}} >{{\App\CPU\translate('Delivered')}} </option>
                                         <option
@@ -130,12 +130,13 @@
                                             value="failed" {{$order->order_status == 'failed'?'selected':''}} >{{\App\CPU\translate('Failed')}} </option>
                                         <option
                                             value="canceled" {{$order->order_status == 'canceled'?'selected':''}} >{{\App\CPU\translate('Canceled')}} </option>
-                                    </select>
+                                    </select> --}}
+                                    <input class="form-control" value=" {{$order->order_status}}" readonly>
                                 </div>
                             </div>
                             <div class="col-6 hs-unfold float-right pr-2">
                                 <div class="dropdown">
-                                    <select name="payment_status" class="payment_status form-control"
+                                    {{-- <select name="payment_status" class="payment_status form-control"
                                             data-id="{{$order['id']}}">
 
                                         <option
@@ -148,7 +149,8 @@
                                             {{\App\CPU\translate('Unpaid')}}
                                         </option>
 
-                                    </select>
+                                    </select> --}}
+                                    <input class="form-control" value="{{$order->payment_status}}" readonly>
                                 </div>
                             </div>
                         </div>
@@ -420,7 +422,7 @@
                             </li>
                             @endif
                             <li>
-                                <select class="form-control text-capitalize" name="delivery_type" onchange="choose_delivery_type(this.value)">
+                                {{-- <select class="form-control text-capitalize" name="delivery_type" onchange="choose_delivery_type(this.value)" disabled>
                                     <option value="0">
                                         {{\App\CPU\translate('choose_delivery_type')}}
                                     </option>
@@ -431,13 +433,14 @@
                                     <option value="third_party_delivery" {{$order->delivery_type=='third_party_delivery'?'selected':''}} >
                                         {{\App\CPU\translate('by_third_party_delivery_service')}}
                                     </option>
-                                </select>
+                                </select> --}}
+                                <input value="{{$order->delivery_type}}" class="form-control" readonly></label>
                             </li>
                             <li id="choose_delivery_man">
                                 <label for="">
                                     {{\App\CPU\translate('choose_delivery_man')}}
                                 </label>
-                                <select class="form-control text-capitalize js-select2-custom" name="delivery_man_id" onchange="addDeliveryMan(this.value)">
+                                <select class="form-control text-capitalize js-select2-custom" name="delivery_man_id" onchange="addDeliveryMan(this.value)" disabled>
                                     <option
                                         value="0">{{\App\CPU\translate('select')}}</option>
                                     @foreach($delivery_men as $deliveryMan)

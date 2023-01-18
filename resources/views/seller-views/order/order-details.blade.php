@@ -680,7 +680,7 @@
                                     // location.reload();
                                 }else{
                                     toastr.success('{{\App\CPU\translate('Status Change successfully')}}!');
-                                    // location.reload();
+                                    location.reload();
                                 }
                             }
                         }

@@ -138,13 +138,15 @@ class CustomerController extends Controller
         $data = User::where('id','!=',0)->
         where(function ($q) use ($key) {
             foreach ($key as $value) {
-                $q->orWhere('f_name', 'like', "%{$value}%")
-                ->orWhere('l_name', 'like', "%{$value}%")
+                // $q->orWhere('f_name', 'like', "%{$value}%")
+                $q->orWhereRaw('COALESCE(f_name,"") like '."'%{$value}%'") 
+                ->orWhereRaw('COALESCE(l_name,"") like '."'%{$value}%'") 
+                // ->orWhere('l_name', 'like', "%{$value}%") 
                 ->orWhere('phone', 'like', "%{$value}%");
             }
         })
-        ->limit(8)
-        ->get([DB::raw('id, CONCAT(f_name, " ", l_name, " (", phone ,")") as text')]);
+        ->limit(50)
+        ->get([DB::raw('id, CONCAT( COALESCE(f_name,"") , " ", COALESCE(l_name,"") , " (", phone ,")") as text')]);
         if($request->all) $data[]=(object)['id'=>false, 'text'=>trans('messages.all')];
         
 

@@ -125,9 +125,10 @@
                                             <label class="input-label"
                                                 for="exampleFormControlInput1">{{ \App\CPU\translate('product_code_sku') }}
                                                 <span class="text-danger">*</span>
-                                                <a class="style-one-pro" style="cursor: pointer;"
+                                                {{-- <a class="style-one-pro" style="cursor: pointer;"
                                                     onclick="document.getElementById('generate_number').value = getRndInteger()">{{ \App\CPU\translate('generate') }}
-                                                    {{ \App\CPU\translate('code') }}</a></label>
+                                                    {{ \App\CPU\translate('code') }}</a> --}}
+                                                </label>
                                             <input type="text" minlength="6" id="generate_number" name="code"
                                                 class="form-control" value="{{ old('code') }}"
                                                 placeholder="{{ \App\CPU\translate('code') }}" required>

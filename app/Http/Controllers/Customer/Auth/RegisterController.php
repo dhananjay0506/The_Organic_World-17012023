@@ -84,7 +84,8 @@ class RegisterController extends Controller
         if ($phone_verification && !$user->is_phone_verified) {
             SMS_module::send($user->phone, $token);
             $response = translate('please_check_your_SMS_for_OTP');
-            Toastr::success($response,$token);
+            // Toastr::success($response,$token);
+            Toastr::success($response);
         }
 
         if ($email_verification && !$user->is_email_verified) {
@@ -99,7 +100,8 @@ class RegisterController extends Controller
                 $response= translate('email_failed');
             }
 
-            Toastr::success($response,$token);
+            // Toastr::success($response,$token);
+            Toastr::success($response);
         }
 
         return view('customer-view.auth.verify', compact('user'));

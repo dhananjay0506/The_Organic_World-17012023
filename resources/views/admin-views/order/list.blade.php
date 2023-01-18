@@ -364,31 +364,6 @@
                             <!-- End Search -->
                         </form>
                     </div>
-                    <div class="col-12 col-md-5 mt-2 mt-sm-0">
-                        <form action="{{ url()->current() }}" id="form-data" method="GET">
-
-                            <div class="row">
-                                <div class="col-12 col-sm-4">
-                                    <input type="date" name="from" value="{{$from}}" id="from_date"
-                                            class="form-control">
-                                </div>
-                                <div class="col-12 col-sm-4 mt-2 mt-sm-0">
-                                    <input type="date" value="{{$to}}" name="to" id="to_date"
-                                            class="form-control">
-                                </div>
-                                <div class="col-12 col-sm-2 mt-2 mt-sm-0  ">
-                                    <button type="submit" class="btn btn-primary float-right float-sm-none" onclick="formUrlChange(this)" data-action="{{ url()->current() }}">
-                                        {{\App\CPU\translate('filter')}}
-                                    </button>
-                                </div>
-                                <div class="col-12 col-sm-2 mt-2 mt-sm-0  ">
-                                    <button type="submit" class="btn btn-success float-right float-sm-none" onclick="formUrlChange(this)" data-action="{{ route('admin.orders.order-bulk-export', ['status' => $status]) }}">
-                                        {{\App\CPU\translate('export')}}
-                                    </button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
                     <div class="col-12 col-md-3 mt-2 mt-md-0">
                         <div class="float-right">
                             <label> {{\App\CPU\translate('inhouse_orders_only')}} : </label>
@@ -398,6 +373,40 @@
                                 <span class="slider round"></span>
                             </label>
                         </div>
+                    </div>
+
+                    <div class="col-12 col-md-12 mt-2 mt-sm-0">
+                        <form action="{{ url()->current() }}" id="form-data" method="GET">
+
+                            <div class="row m-2">
+                                <div class="col-12 col-sm-2 mt-2 mt-sm-0  ">
+                                       <label> {{\App\CPU\translate('filter_on_Shipping_Date')}}</label>
+                                </div>
+                                <div class="col-12 col-sm-2">
+                                    <input type="date" name="from" value="{{$from}}" id="from_date"
+                                            class="form-control">
+                                </div>
+                                <div class="col-12 col-sm-2 mt-2 mt-sm-0">
+                                    <input type="date" value="{{$to}}" name="to" id="to_date"
+                                            class="form-control">
+                                </div>
+                                <div class="col-12 col-sm-2 mt-2 mt-sm-0  ">
+                                    <button type="submit" class="btn btn-primary" onclick="formUrlChange(this)" data-action="{{ url()->current() }}">
+                                        {{\App\CPU\translate('filter')}}
+                                    </button>
+                                </div>
+                                <div class="col-12 col-sm-2 mt-2 mt-sm-0  ">
+                                    <button type="submit" class="btn btn-success" onclick="formUrlChange(this)" data-action="{{ route('admin.orders.order-bulk-export', ['status' => $status]) }}">
+                                        {{\App\CPU\translate('export')}}
+                                    </button>
+                                </div>
+                                <div class="col-12 col-sm-2 mt-2 mt-sm-0  ">
+                                    <button type="submit" class="btn btn-success" onclick="formUrlChange(this)" data-action="{{ route('admin.orders.detail-order-bulk-export', ['status' => $status]) }}">
+                                        {{\App\CPU\translate('Detail_export')}}
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
                     </div>
                 </div>
                 <!-- End Row -->

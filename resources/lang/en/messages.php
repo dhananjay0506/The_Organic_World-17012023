@@ -1945,4 +1945,9 @@
   'Write your message here...' => 'Write your message here...',
   'welcome' => 'Welcome',
   'Transaction Sucessfull' => 'Transaction Sucessfull',
+  'Removed' => 'Removed',
+  'detail-export' => 'Detail-export',
+  'detail_export' => 'Detail export',
+  'Detail_export' => 'Detail export',
+  'filter_on_Shipping_Date' => 'Filter on Shipping Date',
 );

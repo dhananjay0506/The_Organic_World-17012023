@@ -396,7 +396,7 @@ class Helpers
 
     public static function order_status_update_message($status, $customer_phone = '',  $customer_name = '',$order_id= '')
     {
-        $customer  = User::where('phone', 'like', auth('customer')->user()->phone)->first();
+        // $customer  = User::where('phone', 'like', auth('customer')->user()->phone)->first();
         if ($status == 'pending') {
             $data = BusinessSetting::where('type', 'order_pending_message')->first()->value;
         } elseif ($status == 'confirmed') {

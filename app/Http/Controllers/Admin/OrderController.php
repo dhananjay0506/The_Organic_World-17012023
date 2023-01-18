@@ -394,4 +394,210 @@ class OrderController extends Controller
 
 
     }
+
+    public function detail_bulk_export_data(Request $request, $status)
+    {
+        $from = $request['from'];
+        $to = $request['to'];
+
+        $orders = Order::select('orders.*','shops.name as shop_name')->with(['customer','shipping','shippingAddress','delivery_man','billingAddress','details'])
+                        ->where('order_type', 'default_type')
+                        ->join('shops','shops.seller_id','orders.seller_id')
+                        ->when($status !='all', function($q) use($status){
+                            $q->where(function($query) use ($status){
+                                $query->orWhere('order_status',$status)
+                                    ->orWhere('payment_status',$status);
+                            });
+                        })
+                        ->when(session()->has('show_inhouse_orders') && session('show_inhouse_orders') == 1,function($q){
+                            $q->whereHas('details', function ($query) {
+                                $query->whereHas('product', function ($query) {
+                                    $query->where('added_by', 'admin');
+                                    });
+                                });
+                        })
+                        ->when($from!=null && $to!=null,function($query) use($from,$to){
+                            $query->whereBetween('shipping_date', [$from . ' 00:00:00', $to . ' 23:59:59']);
+                        })->orderBy('id', 'DESC')->get();
+
+        if ($orders->count()==0) {
+            Toastr::warning(\App\CPU\translate('Data is Not available!!!'));
+            return back();
+        }
+
+        // return $orders;
+
+        $storage = array();
+
+        foreach ($orders as $item) {
+
+            $order_amount = $item->order_amount;
+            $discount_amount = $item->discount_amount;
+            $shipping_cost = $item->shipping_cost;
+            $extra_discount = $item->extra_discount;
+            // return $item;
+            // $product_detail->variation = gettype($product_detail->variation) == "string" ? json_decode($product_detail->variation) : $product_detail->variation;
+            // return $item;
+            foreach ($item->details as $od_i => $od_dtls) {
+                $sku = "";
+                $p_name = "";
+                $p_code ="";
+                $mrp = 0;
+                $sell_price = 0;
+              
+                // $product_detail = json_decode($od_dtls->product_details);
+            $pDtls = gettype($od_dtls->product_details) == "string" ? json_decode($od_dtls->product_details) : $od_dtls->product_details;
+
+                if(isset($pDtls->variation))
+                {
+                    $vrtns = gettype($pDtls->variation) == "string" ? json_decode($pDtls->variation) : $pDtls->variation;
+                }
+               $vartns_dtls =  array_values(array_filter($vrtns, function($f) use ($od_dtls){
+                    return $f->type == $od_dtls->variant;}));
+                // return $od_dtls;
+                if(isset($vartns_dtls) && is_array($vartns_dtls) && count($vartns_dtls) > 0)
+                {
+                    $sku = isset($vartns_dtls[0]->sku) ? $vartns_dtls[0]->sku : "";
+                }
+                if(isset($vartns_dtls) && is_array($vartns_dtls) && count($vartns_dtls) > 0)
+                {
+                    $mrp = isset($vartns_dtls[0]->price) ? $vartns_dtls[0]->price : 0;
+                }
+                if(isset($od_dtls->price) && isset($od_dtls->tax) && isset($od_dtls->discount))
+                {
+                    $sell_price = ($od_dtls->price + $od_dtls->tax ) -  $od_dtls->discount;
+                }
+                $p_name = isset($pDtls->name) ?  $pDtls->name : "";
+                $p_code = isset($pDtls->code) ?  $pDtls->code : "";
+                // die;
+                $storage[] = [
+                    'Order Date' =>  isset($item->created_at) ? date_format($item->created_at,"d-m-Y h:i:s A") : "-",
+                    'Shippind  Date' =>  isset($item->shipping_date) ? $item->shipping_date : "-",
+                    'Store  Name' =>  $item->shop_name,
+                    'order_id'=>$item->id,
+                    'Customer Name'=> isset($item->customer) ? $item->customer->f_name. ' '.$item->customer->l_name:'not found',
+                    'Customer Phone Number'=> isset($item->customer->phone) ? $item->customer->phone :'not found',
+                    'Customer Email'=> isset($item->customer->email) ? $item->customer->email :'not found',
+                    'SKU Code'=>   $sku,
+                    'Item Name'=>   $p_name,
+                    'Size'=>  ( isset($od_dtls->variant) ?  $od_dtls->variant : "" ) . ( isset($pDtls->unit) ?  $pDtls->unit : "" ),
+                    'Quantity'=>   isset($od_dtls->qty) ?  $od_dtls->qty : "",
+                    'MRP'=>   Helpers::currency_converter($mrp),
+                    'Selling Price'=>   Helpers::currency_converter($sell_price),
+                    'Shipping Cost' => Helpers::currency_converter($shipping_cost),
+                    // 'Order Amount' => Helpers::currency_converter($order_amount),
+                    'Discount Amount' => Helpers::currency_converter($discount_amount),
+                    'Payment Method' => $item->payment_method,
+                    'Shipping Method Name' => isset($item->shipping)? $item->shipping->title:'not found',
+                    'Order Status' => $item->order_status,
+                    'Latitude' => isset($item->shippingAddress)? $item->shippingAddress->latitude:'not found',
+                    'Longitude' => isset($item->shippingAddress)? $item->shippingAddress->longitude:'not found',
+                    'Order Type' => $item->order_type,
+                    'City' => isset($item->shippingAddress)? $item->shippingAddress->city:'not found',
+                    'Pincode' => isset($item->shippingAddress)? $item->shippingAddress->zip:'not found',
+                    // 'Category'=>   $product_detail  variation,
+                    // 'Sub Category'=>   $product_detail  variation,
+                    // 'Sub Sub Category'=>   $product_detail  variation,
+                    'Product Code'=>   $p_code,
+                    // 'Order channnel'=>   $product_detail  variation,
+    
+    
+                    // 'Coupon Code' => $item->coupon_code,
+                   
+                    'Discount Type' => $item->discount_type,
+                    'Extra Discount' => Helpers::currency_converter($extra_discount),
+                    'Extra Discount Type' => $item->extra_discount_type,
+                    'Payment Status' => $item->payment_status,
+                    'Transaction_ref' => $item->transaction_ref,
+                    // //'Verification Code' => $item->verification_code,
+                    'Billing Address' => isset($item->billingAddress)? $item->billingAddress->address:'not found',
+                    'Billing Address Data' => $item->billing_address_data,
+                    'Shipping Type' => $item->shipping_type,
+                    'Shipping Address' => isset($item->shippingAddress)? $item->shippingAddress->address:'not found',
+                    'Shipping Method Id' => $item->shipping_method_id,
+                  
+                    
+                    // // 'Seller Id' => $item->seller_id,
+                    // // 'Seller Name' => isset($item->seller)? $item->seller->f_name. ' '.$item->seller->l_name:'not found',
+                    // // 'Seller Email'  => isset($item->seller)? $item->seller->email:'not found',
+                    // // 'Seller Phone'  => isset($item->seller)? $item->seller->phone:'not found',
+                    // // 'Seller Is' => $item->seller_is,
+                    // // 'Shipping Address Data' => $item->shipping_address_data,
+                    // // 'Delivery Type' => $item->delivery_type,
+                    // // 'Delivery Man Id' => $item->delivery_man_id,
+                    // // 'Delivery Service Name' => $item->delivery_service_name,
+                    // // 'Third Party Delivery Tracking Id' => $item->third_party_delivery_tracking_id,
+                    // // 'Checked' => $item->checked,
+    
+                ];
+            }
+            // $fltrd_variant = array_values(array_filter($product_detail->variation, function($f) use ($item){
+            //     return $f->type == $item->variant;}));
+            //     return $fltrd_variant;
+            // $storage[] = [
+            //     'Order Date' =>  isset($item->created_at) ? date_format($item->created_at,"d-m-Y h:i:s A") : "-",
+            //     'Shippind  Date' =>  isset($item->shipping_date) ? $item->shipping_date : "-",
+            //     'Store  Name' =>  $item->shop_name,
+            //     'order_id'=>$item->id,
+            //     // // 'Customer Id' => $item->customer_id,s
+            //     'Customer Name'=> isset($item->customer) ? $item->customer->f_name. ' '.$item->customer->l_name:'not found',
+            //     // // 'Order Group Id' => $item->order_group_id,
+            //     'Customer Phone Number'=> isset($item->customer->phone) ? $item->customer->phone :'not found',
+            //     'Customer Email'=> isset($item->customer->email) ? $item->customer->email :'not found',
+            //     // 'Size'=>   $product_detail  variation,
+            //     // 'Quantity'=>   $product_detail  variation,
+            //     // 'MRP'=>   $product_detail  variation,
+            //     // 'Selling Price'=>   $product_detail  variation,
+            //     'Shipping Cost' => Helpers::currency_converter($shipping_cost),
+            //     'Order Amount' => Helpers::currency_converter($order_amount),
+            //     'Discount Amount' => Helpers::currency_converter($discount_amount),
+            //     'Payment Method' => $item->payment_method,
+            //     'Shipping Method Name' => isset($item->shipping)? $item->shipping->title:'not found',
+            //     'Order Status' => $item->order_status,
+            //     'Latitude' => isset($item->shippingAddress)? $item->shippingAddress->latitude:'not found',
+            //     'Longitude' => isset($item->shippingAddress)? $item->shippingAddress->longitude:'not found',
+            //     'Order Type' => $item->order_type,
+            //     'City' => isset($item->shippingAddress)? $item->shippingAddress->city:'not found',
+            //     'Pincode' => isset($item->shippingAddress)? $item->shippingAddress->zip:'not found',
+            //     // 'Category'=>   $product_detail  variation,
+            //     // 'Sub Category'=>   $product_detail  variation,
+            //     // 'Sub Sub Category'=>   $product_detail  variation,
+            //     // 'Product Code'=>   $product_detail  variation,
+            //     // 'Order channnel'=>   $product_detail  variation,
+
+
+            //     'Coupon Code' => $item->coupon_code,
+               
+            //     'Discount Type' => $item->discount_type,
+            //     'Extra Discount' => Helpers::currency_converter($extra_discount),
+            //     'Extra Discount Type' => $item->extra_discount_type,
+            //     'Payment Status' => $item->payment_status,
+            //     'Transaction_ref' => $item->transaction_ref,
+            //     // //'Verification Code' => $item->verification_code,
+            //     'Billing Address' => isset($item->billingAddress)? $item->billingAddress->address:'not found',
+            //     'Billing Address Data' => $item->billing_address_data,
+            //     'Shipping Type' => $item->shipping_type,
+            //     'Shipping Address' => isset($item->shippingAddress)? $item->shippingAddress->address:'not found',
+            //     'Shipping Method Id' => $item->shipping_method_id,
+              
+                
+            //     // // 'Seller Id' => $item->seller_id,
+            //     // // 'Seller Name' => isset($item->seller)? $item->seller->f_name. ' '.$item->seller->l_name:'not found',
+            //     // // 'Seller Email'  => isset($item->seller)? $item->seller->email:'not found',
+            //     // // 'Seller Phone'  => isset($item->seller)? $item->seller->phone:'not found',
+            //     // // 'Seller Is' => $item->seller_is,
+            //     // // 'Shipping Address Data' => $item->shipping_address_data,
+            //     // // 'Delivery Type' => $item->delivery_type,
+            //     // // 'Delivery Man Id' => $item->delivery_man_id,
+            //     // // 'Delivery Service Name' => $item->delivery_service_name,
+            //     // // 'Third Party Delivery Tracking Id' => $item->third_party_delivery_tracking_id,
+            //     // // 'Checked' => $item->checked,
+
+            // ];
+        }
+
+        return (new FastExcel($storage))->download('Order_All_details.xlsx');
+
+
+    }
 }

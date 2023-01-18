@@ -303,7 +303,7 @@
                 <div class="card">
                     <div class="card-header">
                         <div class="row justify-content-between flex-grow-1">
-                            <div class="col-12 col-sm-4 col-md-4 mt-2">
+                            <div class="col-12 col-sm-4 col-md-3 mt-2">
                                 <form action="{{ url()->current() }}" method="GET">
                                     <!-- Search -->
                                     <div class="input-group input-group-merge input-group-flush">
@@ -319,31 +319,36 @@
                                     <!-- End Search -->
                                 </form>
                             </div>
-                            <div class="col-12 col-sm-7 col-md-7">
+                            <div class="col-12 col-sm-7 col-md-9">
                                 <form action="" method="GET" id="form-data">
                                     <div class="row">
-                                        <div class="col-12 col-sm-4">
+                                        <div class="col-12 col-sm-4 col-md-3">
                                             <div class="form-group">
                                                 <input  type="date" name="from" id="from_date" value="{{ $from }}"
                                                         class="form-control mt-2" title="{{ \App\CPU\translate('from') }} {{ \App\CPU\translate('date') }}">
                                             </div>
                                         </div>
-                                        <div class="col-12 col-sm-4">
+                                        <div class="col-12 col-sm-4 col-md-3">
                                             <div class="form-group">
                                                 <input type="date" name="to" id="to_date" value="{{ $to }}"
                                                         class="form-control mt-2" title="{{ ucfirst(\App\CPU\translate('to')) }} {{ \App\CPU\translate('date') }}">
                                             </div>
                                         </div>
-                                        <div class="col-md-3 text-right mt-2">
+                                        <div class="col-md-6 text-right mt-2">
                                             <div class="row">
-                                                <div class="col-6 col-md-6">
+                                                <div class="col-6 col-md-3">
                                                     <button type="submit" class="btn btn-primary" onclick="formUrlChange(this)" data-action="{{ url()->current() }}">
                                                         {{\App\CPU\translate('filter')}}
                                                     </button>
                                                 </div>
-                                                <div class="col-6  col-md-6 text-left">
+                                                <div class="col-6  col-md-3 text-left">
                                                     <button type="submit" class="btn btn-success" onclick="formUrlChange(this)" data-action="{{ route('seller.orders.order-bulk-export', ['status' => $status]) }}">
                                                         {{\App\CPU\translate('export')}}
+                                                    </button>
+                                                </div>
+                                                <div class="col-6  col-md-6 text-left">
+                                                    <button type="submit" class="btn btn-success" onclick="formUrlChange(this)" data-action="{{ route('seller.orders.detail-order-bulk-export', ['status' => $status]) }}">
+                                                        {{\App\CPU\translate('Detail_export')}}
                                                     </button>
                                                 </div>
                                             </div>
