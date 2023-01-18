@@ -18,7 +18,7 @@ $overallRating = \App\CPU\ProductManager::get_overall_rating($product->reviews);
         background: #ffffff;
     }
     /* .product-single-hover:hover > .single-product-details {
-        
+
         margin-top:-39px;
     } */
     /* .product-single-hover:hover >  .quick-view{
@@ -30,12 +30,19 @@ $overallRating = \App\CPU\ProductManager::get_overall_rating($product->reviews);
     border: 1px solid #ABABAB;
     border-radius: 20px;
     }
-    
+    .subscribe{
+        border-color:{{$web_config['primary_color']}};
+        color:{{$web_config['primary_color']}};
+        padding:3px 5px;
+        font-size:12px;
+        font-weight:700;
+    }
+
 </style>
 
 {{-- quick view hovr run properly only add the product-single-hover class in below --}}
 <div class=" border_product-single-hover" >
-    <div class=" inline_product clickable d-flex justify-content-center" 
+    <div class=" inline_product clickable d-flex justify-content-center"
             style="cursor: pointer;max-height: 195px;">
         @if($product->discount > 0)
             <div class="d-flex" style="left:5px;top:30px;position: absolute">
@@ -62,12 +69,12 @@ $overallRating = \App\CPU\ProductManager::get_overall_rating($product->reviews);
         </div>
     </div>
     <div class="single-product-details" style="position:relative;min-height:105px;border-radius: 0px 0px 20px 20px;">
-        <div class="text-center p-1" style="height: 55px;">
+        {{-- <div class="text-center p-1" style="height: 55px;">
             <a href="{{route('product',$product->slug)}}" style="font-weight: 500;
                 font-size: 14px; ">
                 {{ Str::limit($product['name'], 50) }}
             </a>
-        </div>
+        </div> --}}
         {{-- <div class="rating-show justify-content-between text-center">
             <span class="d-inline-block font-size-sm text-body" style="font-weight: 400;
             font-size: 10px;">
@@ -101,12 +108,12 @@ $overallRating = \App\CPU\ProductManager::get_overall_rating($product->reviews);
         {{-- <form id="add-to-cart-form" class="mb-2">
             @csrf
             <input type="hidden" name="id" value="{{ $product->id }}">
-        
+
         @foreach (json_decode($product->choice_options) as $key => $choice)
         <div class="flex-start">
             <div>
                 <ul class=" checkbox-alphanumeric checkbox-alphanumeric--style-1 mb-2">
-                    
+
                 <select class="form-control" name="" id="">
                         <option value="0" selected disabled>---{{\App\CPU\translate('Select')}}---</option>
                         @foreach($choice->options as  $key =>$option)
@@ -118,7 +125,7 @@ $overallRating = \App\CPU\ProductManager::get_overall_rating($product->reviews);
             </div>
         </div>
     @endforeach
-    
+
 
     <div class="row no-gutters mt-2" id="chosen_price_div">
         <div class="col-2">
@@ -142,8 +149,8 @@ $overallRating = \App\CPU\ProductManager::get_overall_rating($product->reviews);
 <style>
     .product-title2 {
         /* font-family: 'Roboto', sans-serif !important; */
-        font-weight: 400;
-        font-size: 22px;
+        font-weight: 700;
+        font-size: 16px;
         color: #000000;
         position: relative;
         display: inline-block;
@@ -151,6 +158,18 @@ $overallRating = \App\CPU\ProductManager::get_overall_rating($product->reviews);
         overflow: hidden;
         max-height: 1.2em; /* (Number of lines you want visible) * (line-height) */
         line-height: 1.2em;
+    }
+    .product-title{
+        /* font-family: 'Roboto', sans-serif !important; */
+        font-weight: 700;
+        font-size: 14px;
+        color: #000000;
+        /* position: relative;
+        display: inline-block;
+        word-wrap: break-word;
+        overflow: hidden;
+        max-height: 1.2em; /* (Number of lines you want visible) * (line-height) */
+
     }
 
     .cz-product-gallery {
@@ -173,7 +192,6 @@ $overallRating = \App\CPU\ProductManager::get_overall_rating($product->reviews);
         border-radius: 3px;
         padding: 16px;
         padding-top: 0px;
-        padding-bottom: 7px;
     }
 
     img, figure {
@@ -241,49 +259,113 @@ $overallRating = \App\CPU\ProductManager::get_overall_rating($product->reviews);
     }
     .btn-sm {
     padding: 0.425rem 0.8rem;
-}
+    }
+
+
 </style>
 
 
 
 
     <div class="row ">
-       
+
         <!-- Product details-->
-        <div class="col-lg-12 mt-n3">
+        <div class="col-lg-12 mt-3">
             <div class="details" style="text-align: {{Session::get('direction') === "rtl" ? 'right' : 'left'}};">
-                {{-- <a href="{{route('product',$product->slug)}}" class="mb-2 product-title">{{$product->name}}</a> --}}
-                {{-- <div class="d-flex align-items-center mb-2 pro">
-                    <span
-                        class="d-inline-block font-size-sm text-body align-middle mt-1 {{Session::get('direction') === "rtl" ? 'ml-2 pl-2' : 'mr-2 pr-2'}}">{{$overallRating[0]}}</span>
-                    <div class="star-rating">
-                        @for($inc=0;$inc<5;$inc++)
-                            @if($inc<$overallRating[0])
-                                <i class="sr-star czi-star-filled active"></i>
-                            @else
-                                <i class="sr-star czi-star"></i>
+                <div class="row mb-2">
+                    <div class="col-9">
+                        <a href="{{route('product',$product->slug)}}" class="product-title">{{ Str::limit($product['name'], 15) }}</a>
+                    </div>
+                    {{-- <div class="d-flex align-items-center mb-2 pro"> --}}
+                        {{-- <span
+                            class="d-inline-block font-size-sm text-body align-middle mt-1 {{Session::get('direction') === "rtl" ? 'ml-2 pl-2' : 'mr-2 pr-2'}}">{{$overallRating[0]}}</span> --}}
+                        {{-- <div class="star-rating">
+                            @for($inc=0;$inc<5;$inc++)
+
+                                @if($inc<$overallRating[0])
+                                    <i class="sr-star czi-star-filled active"></i>
+                                @else
+                                    <i class="sr-star czi-star"></i>
+                                @endif
+                            @endfor
+                        </div> --}}
+                        <div class="col-3">
+                            <span
+                            class="d-inline-block font-size-sm text-body {{Session::get('direction') === "rtl" ? 'ml-2 mr-0' : 'ml-1 mr-1'}}"><i class="sr-star czi-star-filled active"></i> {{$overallRating[1]}}</span>
+                            {{-- <span style="width: 0px;height: 10px;border: 0.5px solid #707070; margin-top: 6px"></span>
+                            <span style="width: 0px;height: 10px;border: 0.5px solid #707070; margin-top: 6px">    </span> --}}
+
+                        </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-6">
+                        <div class="mb-3" style="font-size: 12px!important;font-weight:700 !important; color: grey!important;">
+                            <span
+                                class="{{Session::get('direction') === "rtl" ? 'ml-1' : 'mr-1'}}">{{ \App\CPU\translate('MRP')}}
+                                {{\App\CPU\Helpers::currency_converter($product->unit_price)}}
+                                {{-- {{\App\CPU\Helpers::get_price_range($product) }} --}}
+                            </span>
+                            @if($product->discount > 0)
+                                <strike style="font-size: 12px!important;color: grey!important;">
+                                    {{\App\CPU\Helpers::currency_converter($product->unit_price)}}
+                                </strike>
                             @endif
-                        @endfor
+                        </div>
                     </div>
-                    <div>
-                        <span
-                        class="d-inline-block font-size-sm text-body align-middle mt-1 {{Session::get('direction') === "rtl" ? 'ml-2 mr-1' : 'ml-1 mr-2'}} pl-2 pr-2">{{$overallRating[1]}} {{\App\CPU\translate('reviews')}}</span>
-                        <span style="width: 0px;height: 10px;border: 0.5px solid #707070; margin-top: 6px"></span>
-                        <span style="width: 0px;height: 10px;border: 0.5px solid #707070; margin-top: 6px">    </span>
-                       
+
+                    <div class="col-6">
+                        <button class="btn btn-block string-limit btn-tr-bl-radius subscribe" type="button" >{{ \App\CPU\translate('Subscribe')}}</button>
+
                     </div>
-                </div> --}}
-                {{-- <div class="mb-3">
-                    <span
-                        class="h3 font-weight-normal text-accent {{Session::get('direction') === "rtl" ? 'ml-1' : 'mr-1'}}">
-                        {{\App\CPU\Helpers::get_price_range($product) }}
-                    </span>
-                    @if($product->discount > 0)
-                        <strike style="font-size: 12px!important;color: grey!important;">
-                            {{\App\CPU\Helpers::currency_converter($product->unit_price)}}
-                        </strike>
-                    @endif
-                </div> --}}
+                </div>
+                <div class="row">
+                    <div class="card col-5 bg-gray-light">
+                        @foreach (json_decode($product->choice_options) as $key => $choice)
+                        <div class="justify-content-center">
+                            <div class="row p-2">
+                                <img style="height:14px; width:42px" src="{{asset('storage/app/public/company/logo-01 1.png')}}" alt="">
+                            </div>
+                            <div class="row product-price pl-2" style="font-weight: 400;font-size: 12px;">
+                                @if(isset($choice->options))
+                                    @if(count($choice->options) == 1)
+                                        <span class="product-title2" id="chosen_price_{{$product->id}}">
+                                            {{\App\CPU\Helpers::currency_converter(
+                                                $product->unit_price-(\App\CPU\Helpers::get_product_discount($product,$product->unit_price))
+                                            )}}
+                                        </span>
+
+                                        @else
+
+                                                <span class="text-accent ml-lg-5">
+                                                    @php
+                                                    $choice_options = json_decode("$product->choice_options")[0]->options;
+
+                                                            $arr = json_decode("$product->variation");
+
+                                                            $narr = array_values(array_filter($arr, function($f) use ($choice_options){
+                                                            return $f->type == $choice_options[0];}));
+                                                    @endphp
+
+                                                    {{-- <div class="product-price"> --}}
+                                                        <strong id="chosen_price_{{$product->id}}">{{\App\CPU\Helpers::currency_converter(
+                                                            ($narr[0]->price)-(\App\CPU\Helpers::get_product_discount($product,$product->unit_price))
+                                                        )}}</strong>
+                                                    {{-- </div> --}}
+                                            </span>
+
+                                    @endif
+                                @endif
+                            </div>
+                        </div>
+                        @endforeach
+
+
+                    </div>
+                </div>
+
+
+
 
                 {{-- @if($product->discount > 0)
                     <div class="flex-start mb-3">
@@ -323,20 +405,20 @@ $overallRating = \App\CPU\ProductManager::get_overall_rating($product->reviews);
                                 </div>
                             </div>
                         @endif
-                       
+
 
                     </div>
                     @foreach (json_decode($product->choice_options) as $key => $choice)
-                    {{-- @dd($choice->name) --}}
                         <div class="flex-start">
-                            {{-- <div class="product-description-label mt-2 ">
+                            <div class="col-6">
+                                {{-- <div class="product-description-label mt-2 ">
                                 {{ $choice->title }}:
                             </div> --}}
-                            
-                           
+
+
                                 {{-- <ul class=" checkbox-alphanumeric checkbox-alphanumeric--style-1 mb-2"> --}}
 
-                                                              
+
                                 {{-- @foreach ($choice->options as $key => $option)
                                         <span>
                                             <input type="radio"
@@ -347,11 +429,9 @@ $overallRating = \App\CPU\ProductManager::get_overall_rating($product->reviews);
                                         </span>
                                     @endforeach --}}
 
-                                {{-- {{$choice->options[0]}} --}}
                                     @if (count($choice->options) == 1)
-                                    
+
                                     @foreach ($choice->options as $key => $option)
-                                     
                                             <span>
                                                 {{-- <input type="radio"
                                                     id="{{ $choice->name }}-{{ $option }}"
@@ -361,21 +441,19 @@ $overallRating = \App\CPU\ProductManager::get_overall_rating($product->reviews);
                                             </span>
                                     @endforeach
                                     @else
-                                    <select class="mt-0 ml-1 mr-1 mb-1" id="variant_{{$product->id}}" style="padding: 5px; border: 1px solid #dddbdb; border-radius: 8px; width: 100%; font-size: 14px;" onchange="varientprice1({{$product->id}},this.value,'','{{$choice->name}}')">
+                                    <select class="mt-0 ml-1 mr-1 mb-1" id="variant_{{$product->id}}" style="padding: 5px; border: 1px solid #dddbdb; border-radius: 8px; width: 100%; font-size: 14px;" onchange="varientprice1({{$product->id}},this.value)">
                                         {{-- <option value="0">---{{\App\CPU\translate('select')}}---</option> --}}
                                         @foreach($choice->options as $option)
-                                            <option
-                                                value="{{$option}}">{{$option}}&nbsp;{{$product->unit}}</option>
+                                            <option value="{{$option}}">{{$option}}&nbsp;{{$product->unit}}</option>
                                         @endforeach
                                     </select>
                                     @endif
-                                
-                          
-                           
+                            </div>
+
                         </div>
                     @endforeach
 
-                    <div class="row no-gutters">
+                    {{-- <div class="row no-gutters">
                         <div class="col-2">
                             <div class="product-description-label mt-2" style="font-size: 12px;">{{\App\CPU\translate('Qty')}}:</div>
                         </div>
@@ -402,85 +480,113 @@ $overallRating = \App\CPU\ProductManager::get_overall_rating($product->reviews);
                                 </div>
                             </div>
                         </div>
-                        <div class="col-3">
-                            @if($product['current_stock']<=0)
-                                <h5 class="" style="color: red; font-size: 10px;">{{\App\CPU\translate('out_of_stock')}}</h5>
-                            @else
-                                <h5 class="" style="color: red; font-size: 10px;">{{\App\CPU\translate('in_stock')}}</h5>
-                            @endif
-                        </div>
-                    </div>
 
-                    
-                    
-                    <div class="d-flex justify-content-between text-center">
+                        <div class="col-3">
+                        @if($product['current_stock']<=0)
+                            <h5 class="" style="color: red; font-size: 10px;">{{\App\CPU\translate('out_of_stock')}}</h5>
+                        @else
+                            <h5 class="" style="color: red; font-size: 10px;">{{\App\CPU\translate('in_stock')}}</h5>
+                        @endif
+                        </div>
+                    </div> --}}
+
+
+
+                    {{-- <div class="d-flex justify-content-between text-center">
                         <div class="product-price text-center" style="font-weight: 400;font-size: 12px;">
-                        @if(isset($choice->options))
-                        @if(count($choice->options) == 1)
-                        <span>
-                            @if($product->discount > 0)
-                                <strike style="font-size: 12px!important;color: #E96A6A!important;">
-                                    {{\App\CPU\Helpers::currency_converter($product->unit_price)}}
-                                </strike>
-                            @endif
-                            </span>
-                            <span class="text-accent ml-lg-5" id="chosen_price_{{$product->id}}">
-                                {{\App\CPU\Helpers::currency_converter(
-                                    $product->unit_price-(\App\CPU\Helpers::get_product_discount($product,$product->unit_price))
-                                )}}
-                            </span>
-                       
-                            @else
-                                <span>
+                            @if(isset($choice->options))
+                                @if(count($choice->options) == 1)
+                                    <span>
                                     @if($product->discount > 0)
-                                        <strike id="discount_{{$product->id}}" style="font-size: 12px!important;color: #E96A6A!important;">
+                                        <strike style="font-size: 12px!important;color: #E96A6A!important;">
                                             {{\App\CPU\Helpers::currency_converter($product->unit_price)}}
                                         </strike>
                                     @endif
-                                </span>
-                                <span class="text-accent ml-lg-5">
-                                    @php
-                                    $choice_options = json_decode("$product->choice_options")[0]->options;
-                                        
-                                            $arr = json_decode("$product->variation");
-                                            
-                                            $narr = array_values(array_filter($arr, function($f) use ($choice_options){
-                                            return $f->type == $choice_options[0];}));       
-                                    @endphp
-                                
-                                    {{-- <div class="product-price"> --}}
-                                        <strong id="chosen_price_{{$product->id}}">{{\App\CPU\Helpers::currency_converter(
-                                            ($narr[0]->price)-(\App\CPU\Helpers::get_product_discount($product,$product->unit_price)) 
-                                        )}}</strong>
-                                    {{-- </div> --}}
-                                </span>
-                                
+                                    </span>
+                                    <span class="text-accent ml-lg-5" id="chosen_price_{{$product->id}}">
+                                        {{\App\CPU\Helpers::currency_converter(
+                                            $product->unit_price-(\App\CPU\Helpers::get_product_discount($product,$product->unit_price))
+                                        )}}
+                                    </span>
+
+                                    @else
+                                        <span>
+                                            @if($product->discount > 0)
+                                                <strike id="discount_{{$product->id}}" style="font-size: 12px!important;color: #E96A6A!important;">
+                                                    {{\App\CPU\Helpers::currency_converter($product->unit_price)}}
+                                                </strike>
+                                            @endif
+                                            </span>
+                                            <span class="text-accent ml-lg-5">
+                                                @php
+                                                $choice_options = json_decode("$product->choice_options")[0]->options;
+
+                                                        $arr = json_decode("$product->variation");
+
+                                                        $narr = array_values(array_filter($arr, function($f) use ($choice_options){
+                                                        return $f->type == $choice_options[0];}));
+                                                @endphp
+                                             --}}
+                                                {{-- <div class="product-price"> --}}
+                                                    {{-- <strong id="chosen_price_{{$product->id}}">{{\App\CPU\Helpers::currency_converter(
+                                                        ($narr[0]->price)-(\App\CPU\Helpers::get_product_discount($product,$product->unit_price))
+                                                    )}}</strong> --}}
+                                                {{-- </div> --}}
+                                        {{-- </span>
+
                                 @endif
-                                @endif
+                            @endif
                         </div>
-                    </div>
-                
+                    </div> --}}
+
                     <div class="d-flex mt-2 justify-content-center">
                         <div class="row ml-lg-n2 ml-0">
-                            <div class="col-6">
-                                <button class="btn bg-custome-warming btn-sm ml-lg-n2 text-white" onclick="buy_now('dynamic-form',true,{{$product->id}})"
-                                        type="button"
-                                        style="border-radius: 10px">&nbsp;
-                                    {{\App\CPU\translate('buy_now')}} &nbsp;
-                                </button>
+                        <div class="card col-6">
+
+                            <div class="input-group input-group--style-2" style="width: 90px;">
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-number" type="button"
+                                                data-type="minus" data-field="quantity_{{$product->id}}"
+                                                disabled="disabled" style="padding: 3px" data-product_id="{{$product->id}}">
+                                            -
+                                        </button>
+                                    </span>
+                                    <input type="text" name="quantity_{{$product->id}}" id="quantity_{{$product->id}}"  data-quantity="quantity_{{$product->id}}"
+                                           class=" input-number text-center cart-qty-field"
+                                           placeholder="1" value="{{ $product->minimum_order_qty ?? 1 }}" min="{{ $product->minimum_order_qty ?? 1 }}" max="100" style="padding: 5px; border: none; font-size: 13px; width: 40px;height: 35px;">
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-number" type="button" data-type="plus"
+                                                data-field="quantity_{{$product->id}}" style="padding: 3px" data-product_id="{{$product->id}}">
+                                           +
+                                        </button>
+                                    </span>
                             </div>
-                            <div class="col-6">
-                                <button class="btn btn-primary btn-sm string-limit"
-                                        onclick="addToCart('dynamic-form',false,{{$product->id}})"
-                                        type="button"
-                                        style="border-radius: 10px">
-                                    {{\App\CPU\translate('add_to_cart')}}
-                                </button>
-        
-                            </div>    
-                        </div>                                    
+                            {{-- <button class="btn bg-custome-warming btn-sm ml-lg-n2 text-white" onclick="buy_now('dynamic-form',true,{{$product->id}})"
+                                    type="button"
+                                    style="">&nbsp;
+                                {{\App\CPU\translate('buy_now')}} &nbsp;
+                            </button> --}}
+                        </div>
+                        {{-- <div class="col-6">
+                            <button class="btn btn-primary btn-sm string-limit"
+                                    onclick="addToCart('dynamic-form',false,{{$product->id}})"
+                                    type="button"
+                                    style="">
+                                {{\App\CPU\translate('add_to_cart')}}
+                            </button>
+
+                        </div>     --}}
+                        <div class="col-6">
+                            <button class="btn btn-block btn-primary btn-sm btn-tr-bl-radius string-limit"
+                                    onclick="addToCart('dynamic-form',false,{{$product->id}})"
+                                    type="button">
+                                {{\App\CPU\translate('Add')}}
+                            </button>
+
+                        </div>
+                        </div>
                     </div>
-                   
+
                 {{-- </form> --}}
                 <!-- Product panels-->
             </div>
@@ -491,7 +597,7 @@ $overallRating = \App\CPU\ProductManager::get_overall_rating($product->reviews);
 
 
         {{-- 24-11-2022 --}}
-        
+
     </div>
     {{-- <div class="text-center quick-view" >
         @if(Request::is('product/*'))
@@ -521,9 +627,9 @@ $overallRating = \App\CPU\ProductManager::get_overall_rating($product->reviews);
     });
 
     $(document).ready(function() {
-       
+
         cartQuantityInitialize()
-       
+
         $('.click-img').click(function(){
             var idimg = $(this).attr('id');s
             var srcimg = $(this).attr('src');
@@ -551,19 +657,19 @@ $overallRating = \App\CPU\ProductManager::get_overall_rating($product->reviews);
     //     });
     // }
 
-    function varientprice1(product_id,value,qty,choice_key=''){
-        // console.log(choice_key);
+    function varientprice1(product_id,value){
+        // console.log(value);
         // console.log(product_id,value,quantity);
         // console.log(document.getElementById('variant_'+product_id).value);
         var  quantity = $('#quantity_'+product_id).val();
         var pos_obj = {
                 _token : @json(csrf_token()),
                 id: product_id,
-               
+
                 quantity : quantity
             };
 
-            value !="" ? pos_obj[(choice_key == '' ? 'choice_1' : choice_key)] = value : '';
+            value !="" ? pos_obj.choice_1 = value : '';
     $.post({
             url: '{{route('cart.variant_price')}}',
             dataType: 'json',
@@ -575,7 +681,6 @@ $overallRating = \App\CPU\ProductManager::get_overall_rating($product->reviews);
                 // $('#loading').show();
             },
             success: function (data) {
-            //    console.log(data);
                 // $('#add-to-cart-form1 #chosen_price_div').removeClass('d-none');
                 //     $('#add-to-cart-form1 #chosen_price_div #chosen_price').html(data.price);
                 //     $('#set-discount-amount').html(data.discount);
@@ -598,7 +703,7 @@ $overallRating = \App\CPU\ProductManager::get_overall_rating($product->reviews);
         });
     }
 
-    // 27-11-2022 
+    // 27-11-2022
     // for plus minus quantity
     function checkAddToCartValidity() {
         var names = {};
@@ -616,7 +721,7 @@ $overallRating = \App\CPU\ProductManager::get_overall_rating($product->reviews);
     }
 
     function cartQuantityInitialize1() {
-       
+
         $('.btn-number').click(function (e) {
             e.stopImmediatePropagation();
             e.preventDefault();
@@ -634,7 +739,7 @@ $overallRating = \App\CPU\ProductManager::get_overall_rating($product->reviews);
             // console.log(input);
             var currentVal = parseInt(input.val());
             // console.log(currentVal);
-            
+
             var variation_value = $('#variant_'+product_id).val();
 
             typeof variation_value != "undefined" && variation_value != null && variation_value != "" ? '' : variation_value = '';
@@ -942,7 +1047,7 @@ $overallRating = \App\CPU\ProductManager::get_overall_rating($product->reviews);
     };
 
     // for plus minus quantity
-    // 27-11-2022 
+    // 27-11-2022
 
 // add to cart
 
@@ -997,7 +1102,7 @@ $overallRating = \App\CPU\ProductManager::get_overall_rating($product->reviews);
 //     }
 
 
-    
+
 </script>
-    
+
 

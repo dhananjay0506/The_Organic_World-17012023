@@ -265,7 +265,7 @@ class BusinessSettingsController extends Controller
         DB::table('business_settings')->updateOrInsert(['type' => 'decimal_point_settings'], [
             'value' => $request['decimal_point_settings']
         ]);
-        
+
         DB::table('business_settings')->updateOrInsert(['type' => 'shop_address'], [
             'value' => $request['shop_address']
         ]);
@@ -321,6 +321,12 @@ class BusinessSettingsController extends Controller
                     [
                         'primary' => $request['primary'],
                         'secondary' => $request['secondary'],
+                        'success' => $request['success'],
+                        'info' => $request['info'],
+                        'warning' => $request['warning'],
+                        'danger' => $request['danger'],
+                        'light' => $request['light'],
+                        'dark' => $request['dark'],
                     ]),
             ]);
         } else {
@@ -330,6 +336,12 @@ class BusinessSettingsController extends Controller
                     [
                         'primary' => $request['primary'],
                         'secondary' => $request['secondary'],
+                        'success' => $request['success'],
+                        'info' => $request['info'],
+                        'warning' => $request['warning'],
+                        'danger' => $request['danger'],
+                        'light' => $request['light'],
+                        'dark' => $request['dark'],
                     ]),
             ]);
         }
@@ -541,6 +553,12 @@ class BusinessSettingsController extends Controller
                     [
                         'primary' => $request['primary'],
                         'secondary' => $request['secondary'],
+                        'success' => $request['success'],
+                        'info' => $request['info'],
+                        'warning' => $request['warning'],
+                        'danger' => $request['danger'],
+                        'light' => $request['light'],
+                        'dark' => $request['dark'],
                     ]),
             ]);
         } else {
@@ -550,6 +568,12 @@ class BusinessSettingsController extends Controller
                     [
                         'primary' => $request['primary'],
                         'secondary' => $request['secondary'],
+                        'success' => $request['success'],
+                        'info' => $request['info'],
+                        'warning' => $request['warning'],
+                        'danger' => $request['danger'],
+                        'light' => $request['light'],
+                        'dark' => $request['dark'],
                     ]),
             ]);
         }
@@ -720,7 +744,7 @@ class BusinessSettingsController extends Controller
 
     public function product_approval(Request $request)
     {
-        
+
         DB::table('business_settings')->updateOrInsert(['type' => 'new_product_approval'], [
             'value' => $request->new_product_approval == 'on'?1:0
         ]);

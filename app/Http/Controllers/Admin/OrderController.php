@@ -46,7 +46,7 @@ class OrderController extends Controller
             })->with(['customer']);
 
         if ($status != 'all') {
-           
+
             $orders = Order::when(session()->has('show_inhouse_orders') && session('show_inhouse_orders') == 1,function($q){
                         $q->whereHas('details', function ($query) {
                     $query->whereHas('product', function ($query) {
@@ -58,13 +58,13 @@ class OrderController extends Controller
                           ->orWhere('payment_status',$status);
                 });
         } else {
-            
+
                 $orders = $query;
             }
         } else {
-            
+
             if ($status != 'all') {
-                
+
                 $orders = Order::select('orders.*','shops.name as shop_name')->when(session()->has('show_inhouse_orders') && session('show_inhouse_orders') == 1,function($q){
                     $q->whereHas('details', function ($query) {
                 $query->whereHas('product', function ($query) {
@@ -78,7 +78,7 @@ class OrderController extends Controller
                           ->orWhere('payment_status',$status);
                 });
             } else {
-               
+
                 $orders = Order::select('orders.*','shops.name as shop_name')
                                 ->with(['customer'])
                                 ->join('shops','orders.seller_id','shops.seller_id');
@@ -102,9 +102,145 @@ class OrderController extends Controller
                     });
 
 
-                    
+
         $orders = $orders->where('order_type','default_type')->orderBy('orders.id','desc')->paginate(Helpers::pagination_limit())->appends(['search'=>$request['search'],'from'=>$request['from'],'to'=>$request['to']]);
         return view('admin-views.order.list', compact('orders', 'search','from','to','status'));
+    }
+
+    public function tomarowlist(Request $request, $status)
+    {
+        try {
+            // return "hii";
+            $date=now();
+            $tomorrow = $date->modify('+1 day')->toDateString();
+            // $search = $request['search'];
+            // $from = $request['from'];
+            // $to = $request['to'];
+            $success = array();
+            $failed =  array();
+            $orders = Order::select('orders.id as onlineReferenceNo','orders.order_status as status','orders.discount_amount as totalDiscountAmount',
+                                        'orders.order_note as orderRemarks',
+                                        'shipping_addresses.contact_person_name as shippingName',
+                                        'shipping_addresses.address as shippingAddress1','shipping_addresses.city as shippingPlace',
+                                        'shipping_addresses.state as shippingState','shipping_addresses.country as shippingCountry','shipping_addresses.zip as shippingPincode',
+                                        'shipping_addresses.phone as shippingPhone','shipping_addresses.phone as shippingMobile','users.email as shippingEmail','orders.shipping_cost as shippingCharge',
+                                        'shipping_methods.title as shippingMethod','orders.coupon_code as discountCoupon','orders.shipping_date as deliveryDate','users.id as customerId',
+                                        'users.f_name AS customerName','orders.customer_type as customerType','shipping_addresses.address as customerAddressLine1',
+                                        'users.street_address as customerArea','shipping_addresses.city as customerCity','shipping_addresses.state as customerState',
+                                        'shipping_addresses.country as customerCountry','shipping_addresses.zip as customerPincode','users.phone as customerPhone',
+                                        'users.phone as customerMobile','users.email as customerEmail','orders.order_amount as totalAmount','orders.payment_method as paymentMode',)
+                            ->where('shipping_date','=',$tomorrow)
+                            ->join('shipping_addresses','orders.shipping_address','shipping_addresses.id')
+                            ->join('shipping_methods','orders.shipping_method_id','shipping_methods.id')
+                            ->join('users','orders.customer_id','users.id')->get();
+
+            foreach ($orders as $order) {
+                $output['salesOrder']= $order;
+                $output['salesOrder']->shippingId = strval($output['salesOrder']->onlineReferenceNo);
+                $output['salesOrder']->onlineChildReferenceNo = strval($output['salesOrder']->onlineReferenceNo);
+                $output['salesOrder']->courierPartner = "";
+                $output['salesOrder']->ShippingAddress2 = "";
+                $output['salesOrder']->shippingCharge = strval($output['salesOrder']->shippingCharge);
+                $output['salesOrder']->ShipmentPointsUsed = 0.0;
+                $output['salesOrder']->packingCharge = "0.0";
+                $output['salesOrder']->shipmentABN ="";
+                $output['salesOrder']->shipmentWeight = 0.0;
+                $output['salesOrder']->locationId = 1;
+                $output['salesOrder']->userId = "ecomm";
+                $output['salesOrder']->outletId = 2;
+                $output['salesOrder']->customerAddressLine2 = "";
+                $output['salesOrder']->customerAddressLine3 = "";
+                $output['salesOrder']->invoiceNo = "";
+                $id = $output['salesOrder']->onlineReferenceNo;
+                $date= strtotime($output['salesOrder']->deliveryDate);
+                $date = date('Y-m-d h:i:s',$date);
+                $output['salesOrder']->deliveryDate = $date;
+                $output['salesOrder']->status = "pending";
+                $output['salesOrder']->totalFreeQty = 0.0;
+                $orderItems = OrderDetail::select('order_details.id as itemReferenceCode','products.name as itemName',
+                                    'products.unit_price as salePrice','order_details.qty as quantity','order_details.tax as taxPercentage',
+                                    'products.tax_type as itemTaxType','order_details.discount as discountPercentage','products.unit_price as itemMarketPrice',
+                                    'order_details.variant as weight')
+                                ->where('order_id','=',$id)
+                                ->join('products','order_details.product_id','products.id')->get();
+                // return $orderItems;
+                $rowNo = 1;
+                $quantity = 0;
+                $discount = 0;
+                $itemsAmount = 0;
+                $tax = 0;
+                foreach($orderItems as $orderItem){
+                    $orderItem->rowNo = $rowNo;
+                    $orderItem->itemId = 449;
+                    $orderItem->itemReferenceCode = strval($orderItem->itemReferenceCode);
+                    $orderItem->suppliedQty = "0";
+                    $orderItem->itemAmount = $orderItem->salePrice * $orderItem->quantity;
+                    $orderItem->iBarU = 0;
+                    $orderItem->itemRemarks = "";
+                    $orderItem->freeQty = 0;
+                    $itemsAmount = $itemsAmount + $orderItem->itemAmount;
+                    $rowNo++;
+                    $quantity = $quantity + $orderItem->quantity;
+                    $discount = $discount + $orderItem->discountPercentage;
+                    $tax = $tax + $orderItem->taxPercentage;
+                }
+                $output['salesOrder']->orderDiscAmt = $itemsAmount - $output['salesOrder']->totalAmount;
+                $output['salesOrder']->totalQuantity = $quantity;
+                $output['salesOrder']->shipmentItems = count($orderItems);
+                if($output['salesOrder']->discountCoupon == "0"){
+                    $output['salesOrder']->discountCoupon = " ";
+                }
+                else{
+                    $output['salesOrder']->discountCoupon;
+                }
+                if($tax != 0){
+                    $output['salesOrder']->orderDiscPerc = $discount / count($orderItems);
+                }
+                else{
+                    $output['salesOrder']->orderDiscPerc = 0;
+                }
+                if($tax != 0){
+                    $output['salesOrder']->totalTaxAmount = ($output['salesOrder']->totalAmount*($tax/count($orderItems)))/100;
+                }
+                else{
+                    $output['salesOrder']->totalTaxAmount = 0;
+                }
+                $output['salesOrder']->orderItems = $orderItems;
+
+                // return json_encode($output);
+
+                $ch = curl_init();
+
+                $options = array(
+                    CURLOPT_URL => 'http://toweuaterp.gofrugal.com/GoFrugalERPAdapter/rest/sales-order/create-order?mode=Create',
+                    CURLOPT_POST => 1,
+                    CURLOPT_POSTFIELDS => json_encode($output),
+                    CURLOPT_RETURNTRANSFER => 1,
+                    CURLOPT_HTTPHEADER => array(
+                        'Content-Type: Application/json',
+                        'X-Auth-Token: BF604D23360D1F523C0D444BB463D3E996F12C1A7EF1793454E85B2ADF8F8AACB59C3521B61AB17B')
+                );
+                curl_setopt_array($ch, $options);
+                $response = curl_exec($ch);
+                curl_close($ch);
+                $response = json_encode($response);
+                // return $response;
+                if($response == 'false'){
+                     $failed[] =  $output['salesOrder']->shippingId;
+                }
+                else{
+                    $success[] = $output['salesOrder']->shippingId;
+                }
+            }
+
+            $data['Success_orderId']=$success;
+            $data['Fail_orderId']= $failed;
+            return $data;
+
+        } catch (\Throwable $th) {
+            return ($th->getMessage());
+        }
+
     }
 
     public function details($id)
@@ -112,14 +248,6 @@ class OrderController extends Controller
         // return "hii";
         $order = Order::with('details', 'shipping', 'seller')->where(['id' => $id])->first();
 
-        
-        // if($order->shipping->free_shipping_status == 1){
-        //     if($order->shipping->minimum_cart_value < $order->order_amount){
-        //         $order->shipping_cost = 0;
-        //     }
-        // }
-       
-        // return $order;
         $linked_orders = Order::where(['order_group_id' => $order['order_group_id']])
             ->whereNotIn('order_group_id', ['def-order-group'])
             ->whereNotIn('id', [$order['id']])
@@ -137,10 +265,9 @@ class OrderController extends Controller
         $shipping_address = ShippingAddress::find($order->shipping_address);
         if($order->order_type == 'default_type')
         {
-            // return "hii";
             return view('admin-views.order.order-details', compact('shipping_address','order', 'linked_orders', 'delivery_men'));
         }else{
-            
+
             return view('admin-views.pos.order.order-details', compact('order'));
         }
 
@@ -204,7 +331,7 @@ class OrderController extends Controller
         $value = Helpers::order_status_update_message($request->order_status,$customer->phone,$customer->name, $order_id);
 
         return  $value; die;
-     
+
         try {
             if ($value) {
                 $data = [
@@ -332,7 +459,7 @@ class OrderController extends Controller
                                 });
                         })
                         ->when($from!=null && $to!=null,function($query) use($from,$to){
-                            $query->whereBetween('shipping_date', [$from . ' 00:00:00', $to . ' 23:59:59']);
+                            $query->whereBetween('created_at', [$from . ' 00:00:00', $to . ' 23:59:59']);
                         })->orderBy('id', 'DESC')->get();
 
         if ($orders->count()==0) {
@@ -388,212 +515,6 @@ class OrderController extends Controller
                 'Checked' => $item->checked,
 
             ];
-        }
-
-        return (new FastExcel($storage))->download('Order_All_details.xlsx');
-
-
-    }
-
-    public function detail_bulk_export_data(Request $request, $status)
-    {
-        $from = $request['from'];
-        $to = $request['to'];
-
-        $orders = Order::select('orders.*','shops.name as shop_name')->with(['customer','shipping','shippingAddress','delivery_man','billingAddress','details'])
-                        ->where('order_type', 'default_type')
-                        ->join('shops','shops.seller_id','orders.seller_id')
-                        ->when($status !='all', function($q) use($status){
-                            $q->where(function($query) use ($status){
-                                $query->orWhere('order_status',$status)
-                                    ->orWhere('payment_status',$status);
-                            });
-                        })
-                        ->when(session()->has('show_inhouse_orders') && session('show_inhouse_orders') == 1,function($q){
-                            $q->whereHas('details', function ($query) {
-                                $query->whereHas('product', function ($query) {
-                                    $query->where('added_by', 'admin');
-                                    });
-                                });
-                        })
-                        ->when($from!=null && $to!=null,function($query) use($from,$to){
-                            $query->whereBetween('shipping_date', [$from . ' 00:00:00', $to . ' 23:59:59']);
-                        })->orderBy('id', 'DESC')->get();
-
-        if ($orders->count()==0) {
-            Toastr::warning(\App\CPU\translate('Data is Not available!!!'));
-            return back();
-        }
-
-        // return $orders;
-
-        $storage = array();
-
-        foreach ($orders as $item) {
-
-            $order_amount = $item->order_amount;
-            $discount_amount = $item->discount_amount;
-            $shipping_cost = $item->shipping_cost;
-            $extra_discount = $item->extra_discount;
-            // return $item;
-            // $product_detail->variation = gettype($product_detail->variation) == "string" ? json_decode($product_detail->variation) : $product_detail->variation;
-            // return $item;
-            foreach ($item->details as $od_i => $od_dtls) {
-                $sku = "";
-                $p_name = "";
-                $p_code ="";
-                $mrp = 0;
-                $sell_price = 0;
-              
-                // $product_detail = json_decode($od_dtls->product_details);
-            $pDtls = gettype($od_dtls->product_details) == "string" ? json_decode($od_dtls->product_details) : $od_dtls->product_details;
-
-                if(isset($pDtls->variation))
-                {
-                    $vrtns = gettype($pDtls->variation) == "string" ? json_decode($pDtls->variation) : $pDtls->variation;
-                }
-               $vartns_dtls =  array_values(array_filter($vrtns, function($f) use ($od_dtls){
-                    return $f->type == $od_dtls->variant;}));
-                // return $od_dtls;
-                if(isset($vartns_dtls) && is_array($vartns_dtls) && count($vartns_dtls) > 0)
-                {
-                    $sku = isset($vartns_dtls[0]->sku) ? $vartns_dtls[0]->sku : "";
-                }
-                if(isset($vartns_dtls) && is_array($vartns_dtls) && count($vartns_dtls) > 0)
-                {
-                    $mrp = isset($vartns_dtls[0]->price) ? $vartns_dtls[0]->price : 0;
-                }
-                if(isset($od_dtls->price) && isset($od_dtls->tax) && isset($od_dtls->discount))
-                {
-                    $sell_price = ($od_dtls->price + $od_dtls->tax ) -  $od_dtls->discount;
-                }
-                $p_name = isset($pDtls->name) ?  $pDtls->name : "";
-                $p_code = isset($pDtls->code) ?  $pDtls->code : "";
-                // die;
-                $storage[] = [
-                    'Order Date' =>  isset($item->created_at) ? date_format($item->created_at,"d-m-Y h:i:s A") : "-",
-                    'Shippind  Date' =>  isset($item->shipping_date) ? $item->shipping_date : "-",
-                    'Store  Name' =>  $item->shop_name,
-                    'order_id'=>$item->id,
-                    'Customer Name'=> isset($item->customer) ? $item->customer->f_name. ' '.$item->customer->l_name:'not found',
-                    'Customer Phone Number'=> isset($item->customer->phone) ? $item->customer->phone :'not found',
-                    'Customer Email'=> isset($item->customer->email) ? $item->customer->email :'not found',
-                    'SKU Code'=>   $sku,
-                    'Item Name'=>   $p_name,
-                    'Size'=>  ( isset($od_dtls->variant) ?  $od_dtls->variant : "" ) . ( isset($pDtls->unit) ?  $pDtls->unit : "" ),
-                    'Quantity'=>   isset($od_dtls->qty) ?  $od_dtls->qty : "",
-                    'MRP'=>   Helpers::currency_converter($mrp),
-                    'Selling Price'=>   Helpers::currency_converter($sell_price),
-                    'Shipping Cost' => Helpers::currency_converter($shipping_cost),
-                    // 'Order Amount' => Helpers::currency_converter($order_amount),
-                    'Discount Amount' => Helpers::currency_converter($discount_amount),
-                    'Payment Method' => $item->payment_method,
-                    'Shipping Method Name' => isset($item->shipping)? $item->shipping->title:'not found',
-                    'Order Status' => $item->order_status,
-                    'Latitude' => isset($item->shippingAddress)? $item->shippingAddress->latitude:'not found',
-                    'Longitude' => isset($item->shippingAddress)? $item->shippingAddress->longitude:'not found',
-                    'Order Type' => $item->order_type,
-                    'City' => isset($item->shippingAddress)? $item->shippingAddress->city:'not found',
-                    'Pincode' => isset($item->shippingAddress)? $item->shippingAddress->zip:'not found',
-                    // 'Category'=>   $product_detail  variation,
-                    // 'Sub Category'=>   $product_detail  variation,
-                    // 'Sub Sub Category'=>   $product_detail  variation,
-                    'Product Code'=>   $p_code,
-                    // 'Order channnel'=>   $product_detail  variation,
-    
-    
-                    // 'Coupon Code' => $item->coupon_code,
-                   
-                    'Discount Type' => $item->discount_type,
-                    'Extra Discount' => Helpers::currency_converter($extra_discount),
-                    'Extra Discount Type' => $item->extra_discount_type,
-                    'Payment Status' => $item->payment_status,
-                    'Transaction_ref' => $item->transaction_ref,
-                    // //'Verification Code' => $item->verification_code,
-                    'Billing Address' => isset($item->billingAddress)? $item->billingAddress->address:'not found',
-                    'Billing Address Data' => $item->billing_address_data,
-                    'Shipping Type' => $item->shipping_type,
-                    'Shipping Address' => isset($item->shippingAddress)? $item->shippingAddress->address:'not found',
-                    'Shipping Method Id' => $item->shipping_method_id,
-                  
-                    
-                    // // 'Seller Id' => $item->seller_id,
-                    // // 'Seller Name' => isset($item->seller)? $item->seller->f_name. ' '.$item->seller->l_name:'not found',
-                    // // 'Seller Email'  => isset($item->seller)? $item->seller->email:'not found',
-                    // // 'Seller Phone'  => isset($item->seller)? $item->seller->phone:'not found',
-                    // // 'Seller Is' => $item->seller_is,
-                    // // 'Shipping Address Data' => $item->shipping_address_data,
-                    // // 'Delivery Type' => $item->delivery_type,
-                    // // 'Delivery Man Id' => $item->delivery_man_id,
-                    // // 'Delivery Service Name' => $item->delivery_service_name,
-                    // // 'Third Party Delivery Tracking Id' => $item->third_party_delivery_tracking_id,
-                    // // 'Checked' => $item->checked,
-    
-                ];
-            }
-            // $fltrd_variant = array_values(array_filter($product_detail->variation, function($f) use ($item){
-            //     return $f->type == $item->variant;}));
-            //     return $fltrd_variant;
-            // $storage[] = [
-            //     'Order Date' =>  isset($item->created_at) ? date_format($item->created_at,"d-m-Y h:i:s A") : "-",
-            //     'Shippind  Date' =>  isset($item->shipping_date) ? $item->shipping_date : "-",
-            //     'Store  Name' =>  $item->shop_name,
-            //     'order_id'=>$item->id,
-            //     // // 'Customer Id' => $item->customer_id,s
-            //     'Customer Name'=> isset($item->customer) ? $item->customer->f_name. ' '.$item->customer->l_name:'not found',
-            //     // // 'Order Group Id' => $item->order_group_id,
-            //     'Customer Phone Number'=> isset($item->customer->phone) ? $item->customer->phone :'not found',
-            //     'Customer Email'=> isset($item->customer->email) ? $item->customer->email :'not found',
-            //     // 'Size'=>   $product_detail  variation,
-            //     // 'Quantity'=>   $product_detail  variation,
-            //     // 'MRP'=>   $product_detail  variation,
-            //     // 'Selling Price'=>   $product_detail  variation,
-            //     'Shipping Cost' => Helpers::currency_converter($shipping_cost),
-            //     'Order Amount' => Helpers::currency_converter($order_amount),
-            //     'Discount Amount' => Helpers::currency_converter($discount_amount),
-            //     'Payment Method' => $item->payment_method,
-            //     'Shipping Method Name' => isset($item->shipping)? $item->shipping->title:'not found',
-            //     'Order Status' => $item->order_status,
-            //     'Latitude' => isset($item->shippingAddress)? $item->shippingAddress->latitude:'not found',
-            //     'Longitude' => isset($item->shippingAddress)? $item->shippingAddress->longitude:'not found',
-            //     'Order Type' => $item->order_type,
-            //     'City' => isset($item->shippingAddress)? $item->shippingAddress->city:'not found',
-            //     'Pincode' => isset($item->shippingAddress)? $item->shippingAddress->zip:'not found',
-            //     // 'Category'=>   $product_detail  variation,
-            //     // 'Sub Category'=>   $product_detail  variation,
-            //     // 'Sub Sub Category'=>   $product_detail  variation,
-            //     // 'Product Code'=>   $product_detail  variation,
-            //     // 'Order channnel'=>   $product_detail  variation,
-
-
-            //     'Coupon Code' => $item->coupon_code,
-               
-            //     'Discount Type' => $item->discount_type,
-            //     'Extra Discount' => Helpers::currency_converter($extra_discount),
-            //     'Extra Discount Type' => $item->extra_discount_type,
-            //     'Payment Status' => $item->payment_status,
-            //     'Transaction_ref' => $item->transaction_ref,
-            //     // //'Verification Code' => $item->verification_code,
-            //     'Billing Address' => isset($item->billingAddress)? $item->billingAddress->address:'not found',
-            //     'Billing Address Data' => $item->billing_address_data,
-            //     'Shipping Type' => $item->shipping_type,
-            //     'Shipping Address' => isset($item->shippingAddress)? $item->shippingAddress->address:'not found',
-            //     'Shipping Method Id' => $item->shipping_method_id,
-              
-                
-            //     // // 'Seller Id' => $item->seller_id,
-            //     // // 'Seller Name' => isset($item->seller)? $item->seller->f_name. ' '.$item->seller->l_name:'not found',
-            //     // // 'Seller Email'  => isset($item->seller)? $item->seller->email:'not found',
-            //     // // 'Seller Phone'  => isset($item->seller)? $item->seller->phone:'not found',
-            //     // // 'Seller Is' => $item->seller_is,
-            //     // // 'Shipping Address Data' => $item->shipping_address_data,
-            //     // // 'Delivery Type' => $item->delivery_type,
-            //     // // 'Delivery Man Id' => $item->delivery_man_id,
-            //     // // 'Delivery Service Name' => $item->delivery_service_name,
-            //     // // 'Third Party Delivery Tracking Id' => $item->third_party_delivery_tracking_id,
-            //     // // 'Checked' => $item->checked,
-
-            // ];
         }
 
         return (new FastExcel($storage))->download('Order_All_details.xlsx');

@@ -57,11 +57,11 @@ class LoginController extends Controller
 
     public function submit(Request $request)
     {
-        $request->validate([
-            'user_id' => 'required',
-            'password' => 'required|min:8'
-        ]);
-        
+        // $request->validate([
+        //     'user_id' => 'required',
+        //     'password' => 'required|min:8'
+        // ]);
+
         //recaptcha validation
         // $recaptcha = Helpers::get_business_settings('recaptcha');
         // if (isset($recaptcha) && $recaptcha['status'] == 1) {
@@ -127,7 +127,7 @@ class LoginController extends Controller
 
     public function otp_verification(Request $request)
     {
-       
+
         $request->validate([
             'identity' => 'required',
         ]);
@@ -168,7 +168,7 @@ class LoginController extends Controller
                 ];
                 // Toastr::success('',$token);
                 return response()->json(["success"=>true,"message"=>"Check your phone. Password reset otp sent. $token","data"=>$data], 200);
-              
+
             }
         }
 
@@ -183,13 +183,13 @@ class LoginController extends Controller
         $request->validate([
             'otp' => 'required',
         ]);
-        
+
         $id = session('forgot_password_identity');
         $data = DB::table('password_resets')->where('user_type','customer')->where(['token' => $request['otp']])
             ->where('identity', 'like', "%{$id}%")
             ->first();
 
-        
+
         $data = DB::table('users')
                     ->where('users.phone', '=', $data->identity)
                     ->first();

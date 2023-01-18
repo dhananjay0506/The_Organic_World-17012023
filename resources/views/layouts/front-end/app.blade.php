@@ -40,8 +40,7 @@
     <link rel="stylesheet" href="{{asset('public/assets/front-end')}}/css/owl.carousel.min.css"/>
     <link rel="stylesheet" href="{{asset('public/assets/front-end')}}/css/owl.theme.default.min.css"/>
     <link href="https://fonts.cdnfonts.com/css/argentum-sans" rel="stylesheet">
-    {{-- <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css"> --}}
-    <link rel="stylesheet" href="{{asset('public/assets/front-end')}}/css/jquery-ui.css"/>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
 
     {{--dont touch this--}}
     <meta name="_token" content="{{csrf_token()}}">
@@ -51,23 +50,23 @@
     <style>
    /* @font-face {
   font-family: 'artegra_sans_500';
-  src: url('/public/assets/front-end/css/artegra_sans-500-medium.otf'); 
- 
+  src: url('/public/assets/front-end/css/artegra_sans-500-medium.otf');
+
 } */
 /* @font-face {
   font-family: 'ArtegraSans';
-  src: url('/public/assets/front-end/css/ArtegraSans-Medium.woff'); 
- 
+  src: url('/public/assets/front-end/css/ArtegraSans-Medium.woff');
+
 } */
 /* @font-face {
   font-family: 'artegra_sans_400';
-  src: url('/public/assets/front-end//css/artegra_sans-400-regular.otf'); 
- 
+  src: url('/public/assets/front-end//css/artegra_sans-400-regular.otf');
+
 } */
 @font-face {
   font-family: 'BoldenVan';
   src: url('/public/assets/front-end//css/BoldenVan.ttf'); /* IE9 Compat Modes */
- 
+
 }
 
 /*  */
@@ -295,8 +294,8 @@
 /*  */
         /* body {
             background-color: #FAF7EE;
-           font-family: 'Artegra Sans'; 
-           font-weight: normal; 
+           font-family: 'Artegra Sans';
+           font-weight: normal;
            font-style: 'normal';
         } */
 
@@ -311,7 +310,7 @@
             font-weight: 500;
             font-style: normal;
         }
-       
+
         .btn{
             font-family: 'Artegra Sans';
             font-weight: 500;
@@ -1013,14 +1012,14 @@
 {{-- pincode model --}}
 <!-- Modal -->
 @php($pincodes=\App\Model\Pincode::get())
-<div class="modal fade" id="exampleModal_1" tabindex="-1" role="dialog"  data-backdrop="static" aria-labelledby="exampleModalLabel_1" aria-hidden="true">
+<div class="modal fade" id="exampleModal_1" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel_1" aria-hidden="true">
   <div class="modal-dialog modal-sm" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <div class="col-lg-10 text-center">
         <h5 class="modal-title" id="exampleModalLabel_1" style="font-size: 16px">Welcome to Happy Harvest</h5>
         </div>
-        <button type="button" class="close {{ (session()->get('pincode') != '') ? '' : 'd-none' }}" data-dismiss="{{ (session()->get('pincode') != '') ? 'modal' : '' }}" aria-label="close">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
@@ -1033,32 +1032,33 @@
                                     <div class="ui-widget">
                                         <label for="pincode">Enter Pin Code: </label>
                                         <input class="form-control" id="pincode" name="pincode">
-                                      </div>                                  
+                                      </div>
                                 </div>
                         </div>
-                            
+
                                 <div class="row">
-                                    <div class="col-{{ (session()->get('pincode') != '') ? '6' : '12' }} {{ (session()->get('pincode') != '') ? '' : 'text-center' }}">
-                                        <button type="submit" class="btn btn-primary btn-sm">Submit</button>
-                                    </div>
-                                    <div class="col-6">
-                                        <button type="button" class="btn btn-secondary btn-sm {{ (session()->get('pincode') != '') ? '' : 'd-none' }}" data-dismiss="modal">Close</button>
-                                    </div>
+                                <div class="col-6">
+                            <button type="submit" class="btn btn-primary btn-sm">Submit</button>
+                                </div>
+                                <div class="col-6">
+
+                            <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
+                                </div>
                                 </div>
                             <span class="error_pincode text-danger" style="font-size: 12px"></span>
-                           
+
                       </form>
 
                 </div>
                 <!-- /card body -->
     <div class="model-footer">
 
-          
-   
+
+
 
     </div>
-      
-     
+
+
     </div>
   </div>
 </div>
@@ -1112,16 +1112,14 @@
 {!! Toastr::message() !!}
 
 <script src={{asset("public/assets/back-end/js/multiselect-dropdown.js")}}></script>
-<script src={{asset("public/assets/back-end/js/autocomplete-jquery-ui.js")}}></script>
-{{-- <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script> --}}
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
 
 
 <script>
-  
-     var pin_code = $('#pincode_value').val();
+
+     var pin_code = <?php echo (session()->get('pincode')) ?>;
 
     $( document ).ready(function() {
-        // console.log(pin_code);
         if(!pin_code)
         {
             $('#exampleModal_1').modal('show');
@@ -1140,7 +1138,7 @@ $( "#pincode" ).autocomplete({
           },
           success: function( data ) {
             if(data.length != 0){
-            // console.log(data);
+            console.log(data);
             // if(typeof data !=)
             response( data );
             $('.error_pincode').empty();
@@ -1258,9 +1256,9 @@ $( "#pincode" ).autocomplete({
             else if(form_id == 'dynamic-form'){
                 var variation_value = $('#variant_'+product_id).val();
                 pos_obj = {  _token : @json(csrf_token()),
-                    id: product_id,               
+                    id: product_id,
                     quantity : $('#quantity_'+product_id).val()};
-                    
+
                  typeof variation_value != "undefined" && variation_value != null && variation_value != "" ? pos_obj.choice_1 = variation_value : variation_value = '';
 
             }
@@ -1367,7 +1365,7 @@ $( "#pincode" ).autocomplete({
 
             fieldName = $(this).attr('data-field');
 
-           
+
             type = $(this).attr('data-type');
             var input = $("input[name='" + fieldName + "']");
             var currentVal = parseInt(input.val());
@@ -1482,7 +1480,6 @@ $( "#pincode" ).autocomplete({
             } else {
                 updateNavCart();
                 $('#cart-summary').empty().html(response);
-                location.reload();
             }
         });
     }
@@ -1515,7 +1512,7 @@ $( "#pincode" ).autocomplete({
         }
     }
 
-    
+
 
     function checkAddToCartValidity() {
         var names = {};
@@ -1551,9 +1548,9 @@ $( "#pincode" ).autocomplete({
             autoplay: false,
             margin: 10,
               //autoWidth:true,
-                
+
             nav: true,
-            
+
             navText: [
                 "<i class='czi-arrow-{{ Session::get('direction') ===
                 "

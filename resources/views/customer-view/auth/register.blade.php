@@ -40,7 +40,7 @@
                                     <div class="form-group">
                                         <label for="reg-ln">{{\App\CPU\translate('last_name')}}</label>
                                         <input class="form-control" type="text" value="{{old('l_name')}}" name="l_name"
-                                               style="text-align: {{Session::get('direction') === "rtl" ? 'right' : 'left'}};" required>
+                                               style="text-align: {{Session::get('direction') === "rtl" ? 'right' : 'left'}};">
                                         <div class="invalid-feedback">{{\App\CPU\translate('Please enter your last name')}}!</div>
                                     </div>
                                 </div>
@@ -55,7 +55,7 @@
                                 <div class="col-sm-6">
                                     <div class="form-group">
                                         <label for="reg-phone">{{\App\CPU\translate('phone_number')}}
-                                            <small class="text-primary"></small></label>
+                                            <small class="text-primary">( * {{\App\CPU\translate('country_code_is_must')}} {{\App\CPU\translate('like_for_BD_880')}} )</small></label>
                                         <input class="form-control" type="number"  value="{{old('phone')}}"  name="phone"
                                                style="text-align: {{Session::get('direction') === "rtl" ? 'right' : 'left'}};"
                                                required>
@@ -118,7 +118,7 @@
                                     <div class="text-right">
                                         <button class="btn btn-primary" id="sign-up" type="submit" disabled>
                                             <i class="czi-user {{Session::get('direction') === "rtl" ? 'ml-2 mr-n1' : 'mr-2 ml-n1'}}"></i>
-                                            {{\App\CPU\translate('sign_up')}}
+                                            {{\App\CPU\translate('sing_up')}}
                                         </button>
                                     </div>
                                 </div>
@@ -136,7 +136,7 @@
                                                        href="{{route('customer.auth.service-login', $socialLoginService['login_medium'])}}"
                                                        style="width: 100%">
                                                         <i class="czi-{{ $socialLoginService['login_medium'] }} {{Session::get('direction') === "rtl" ? 'ml-2 mr-n1' : 'mr-2 ml-n1'}}"></i>
-                                                        {{\App\CPU\translate('sign_up_with_'.$socialLoginService['login_medium'])}}
+                                                        {{\App\CPU\translate('sing_up_with_'.$socialLoginService['login_medium'])}}
                                                     </a>
                                                 </div>
                                             @endif
