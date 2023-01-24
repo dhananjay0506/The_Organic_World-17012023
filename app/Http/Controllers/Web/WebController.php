@@ -527,11 +527,96 @@ class WebController extends Controller
 
         return view('web-views.checkout-complete');
     }
+    // public function checkout_complete_wallet(Request $request = null)
+    // {
+    //     $cartTotal = CartManager::cart_grand_total();
+    //     $user = Helpers::get_customer($request);
+    //     if( $cartTotal > $user->wallet_balance)
+    //     {
+    //         Toastr::warning(translate('inefficient balance in your wallet to pay for this order!!'));
+    //         return back();
+    //     }else{
+    //         $unique_id = OrderManager::gen_unique_id();
+    //         $order_ids = [];
+    //         foreach (CartManager::get_cart_group_ids() as $group_id) {
+    //             $data = [
+    //                 'payment_method' => 'pay_by_wallet',
+    //                 'order_status' => 'confirmed',
+    //                 'payment_status' => 'paid',
+    //                 'transaction_ref' => '',
+    //                 'order_group_id' => $unique_id,
+    //                 'cart_group_id' => $group_id
+    //             ];
+    //             $order_id = OrderManager::generate_order($data);
+    //             array_push($order_ids, $order_id);
+    //         }
+
+    //         CustomerManager::create_wallet_transaction($user->id, Convert::default($cartTotal), 'order_place','order payment');
+    //         CartManager::cart_clean();
+    //     }
+
+    //     if (session()->has('payment_mode') && session('payment_mode') == 'app') {
+    //         return redirect()->route('payment-success');
+    //     }
+    //     return view('web-views.checkout-complete');
+    // }
+
     public function checkout_complete_wallet(Request $request = null)
     {
-        $cartTotal = CartManager::cart_grand_total();
+        //for the wallet shipping cost functionality 19-01-
+        $discount = session()->has('coupon_discount') ? session('coupon_discount') : 0;
+
+        // $req = array_key_exists('request', $request) ? $request : null;
+        // if ($req != null) {
+        //     if (session()->has('coupon_code') == false) {
+        //         $coupon_code = $req->has('coupon_code') ? $req['coupon_code'] : null;
+        //         $discount = $req->has('coupon_code') ? Helpers::coupon_discount($req) : $discount;
+        //     }
+        //     if (session()->has('address_id') == false) {
+        //         $address_id = $req->has('address_id') ? $req['address_id'] : null;
+        //     }
+        // }
+
+        // if ($discount > 0) {
+        //     $discount = round($discount / count(CartManager::get_cart_group_ids($req)), 2);
+        // }
+
+         $cart_data = CartManager::get_cart($request)->first();
+         $cart_group_id = $cart_data->cart_group_id;
+         $shipping_method = CartShipping::where(['cart_group_id' => $cart_group_id])->first();
+         $order_amount = CartManager::cart_grand_total($cart_group_id) - $discount;
+
+        //  $cartTotal = CartManager::cart_grand_total();
+
+            $shipping_cost = CartManager::get_shipping_cost($cart_group_id);
+
+            $order_amount = $order_amount - $shipping_cost;
+
+            $shippingMethod = ShippingMethod::where('id', $shipping_method->shipping_method_id)->first(); 
+
+            if($shippingMethod->free_shipping_status == 1){
+                if($shippingMethod->minimum_cart_value < $order_amount){
+                            $shipping_cost = 0;
+                            $order_amount = $order_amount;
+                        }
+                        else{
+                            $shipping_cost = $shipping_cost;
+                            $order_amount = $order_amount + $shipping_cost;
+                        }
+            }
+            else{
+                $shipping_cost = $shipping_cost;
+                $order_amount = $order_amount + $shipping_cost;
+            }
+           
+
+           
+
+
         $user = Helpers::get_customer($request);
-        if( $cartTotal > $user->wallet_balance)
+        // if( $cartTotal > $user->wallet_balance)
+        
+        if( $order_amount > $user->wallet_balance)
         {
             Toastr::warning(translate('inefficient balance in your wallet to pay for this order!!'));
             return back();
@@ -551,7 +636,8 @@ class WebController extends Controller
                 array_push($order_ids, $order_id);
             }
 
-            CustomerManager::create_wallet_transaction($user->id, Convert::default($cartTotal), 'order_place','order payment');
+            // CustomerManager::create_wallet_transaction($user->id, Convert::default($cartTotal), 'order_place','order payment');
+            CustomerManager::create_wallet_transaction($user->id, Convert::default($order_amount), 'order_place','order payment');
             CartManager::cart_clean();
         }
 

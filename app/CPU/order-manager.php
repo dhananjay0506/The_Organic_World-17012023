@@ -276,8 +276,9 @@ class OrderManager
          $order_amount = CartManager::cart_grand_total($cart_group_id) - $discount;
        
         
-         $shipping_cost = CartManager::get_shipping_cost($data['cart_group_id']);
+          $shipping_cost = CartManager::get_shipping_cost($data['cart_group_id']);
 
+           $order_amount = $order_amount - $shipping_cost;
         //
         $Date = now(); 
         $shippingMethod = ShippingMethod::where('id', $shipping_method->shipping_method_id)->first(); 
@@ -287,16 +288,16 @@ class OrderManager
         if($shippingMethod->free_shipping_status == 1){
             if($shippingMethod->minimum_cart_value < $order_amount){
                         $shipping_cost = 0;
-                        $order_amount = $order_amount-$shippingMethod->cost;
+                        $order_amount = $order_amount;
                     }
                     else{
                         $shipping_cost = $shipping_cost;
-                        $order_amount = $order_amount;
+                        $order_amount = $order_amount + $shipping_cost;
                     }
         }
         else{
             $shipping_cost = $shipping_cost;
-            $order_amount = $order_amount;
+            $order_amount = $order_amount + $shipping_cost;
         }
        
         // return $order_amount;

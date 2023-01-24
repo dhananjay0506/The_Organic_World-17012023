@@ -16,6 +16,7 @@ class PaymentController extends Controller
 {
     public function payment(Request $request)
     {
+        // return "hii";
         $validator = Validator::make($request->all(), [
             'billing_address_id' => 'required',
             'customer_id' => 'required',
@@ -24,6 +25,8 @@ class PaymentController extends Controller
         if ($validator->errors()->count() > 0) {
             return response()->json(['errors' => Helpers::error_processor($validator)]);
         }
+
+       
 
         session()->put('customer_id', $request['customer_id']);
         session()->put('order_note', $request['order_note']);
@@ -60,8 +63,8 @@ class PaymentController extends Controller
             }
             
             if($shipping_type == 'order_wise'){
-                $cart_shipping = CartShipping::where('cart_group_id', $cart->cart_group_id)->first();
-                if (!isset($cart_shipping)) {
+                $cart_shipping_data = CartShipping::where('cart_group_id', $cart->cart_group_id)->first();
+                if (!isset($cart_shipping_data)) {
                     return response()->json(['errors' => ['code' => 'shipping-method', 'message' => 'Data not found']], 403);
                 }
             }
@@ -70,7 +73,22 @@ class PaymentController extends Controller
         $customer = User::find($request['customer_id']);
 
         if (isset($customer)) {
-            return view('web-views.mobile-app-view.payment');
+            $cart = Cart::where(['customer_id' => $customer->id])->first();
+            if(isset($cart->cart_group_id)){
+              $cart_shipping = CartShipping::where('cart_group_id', $cart->cart_group_id)->leftJoin('shipping_methods','cart_shippings.shipping_method_id','shipping_methods.id')->first();
+            }
+            else{
+                $cart_shipping = [];
+            }
+    
+            if($cart_shipping == null){
+        
+                $cart_shipping = array('minimum_cart_value' => 0, 'free_shipping_status' => 0);
+                $cart_shipping = json_encode($cart_shipping);
+                $cart_shipping = json_decode($cart_shipping);
+            }
+            
+            return view('web-views.mobile-app-view.payment',compact('cart_shipping'));
         }
 
         return response()->json(['errors' => ['code' => 'order-payment', 'message' => 'Data not found']], 403);

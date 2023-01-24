@@ -136,9 +136,10 @@
                                             @if($remain_balance < 0)
                                                 @php($remain_balance = 0)
                                             @endif
+                                            
 
                                             <label >{{ \App\CPU\Helpers::currency_converter($remain_balance) }}</label>
-                                            <input class="remain_balance" type="hidden" value="{{ \App\CPU\Helpers::currency_converter($remain_balance) }}">
+                                            <input class="remain_balance" type="hidden" value="{{ round(\App\CPU\Convert::usdToinr($remain_balance)) * 100 }}"> 
                                            
                                         </div>
                                         <div class="col-lg-6" >
@@ -273,7 +274,7 @@
                                                 <!-- Note that the amount is in paise = 50 INR -->
                                                 <!--amount need to be in paisa-->
                                                 <input type="hiiden" name="user_phone" value="{{!empty(auth('customer')->user()->phone) ? auth('customer')->user()->phone : '' }}">
-                                                <input type="hiiden" name="wallet_balence" value="{{ $wallet }}">
+                                                <input type="hiiden" name="wallet_balence" value="0">
                                                 <script src="https://checkout.razorpay.com/v1/checkout.js" id="razorpay_script"
                                                     data-key="{{ \Illuminate\Support\Facades\Config::get('razor.razor_key') }}"
                                                     data-amount="{{ round(\App\CPU\Convert::usdToinr($amount)) * 100 }}"
@@ -508,6 +509,12 @@
                    
                     <!-- Navigation (desktop)-->
                     <div class="row">
+                        <div class="col-4">
+                            <a class="btn btn-block bg-custome-warming text-white" href="{{ route('checkout-details') }}">
+                                <span class="d-none d-sm-inline ">{{ \App\CPU\translate('Back to Shipping') }}</span>
+                                <span class="d-inline d-sm-none">{{ \App\CPU\translate('Back') }}</span>
+                            </a>
+                        </div>
                         <div class="col-4"> 
                             <button class="btn btn-primary btn-block submit_payment" >
                                 <span class="" >{{ \App\CPU\translate('Pay') }}</span>
@@ -515,12 +522,6 @@
                                
                             </button>
                     </div>
-                        <div class="col-4">
-                            <a class="btn btn-block bg-custome-warming text-white" href="{{ route('checkout-details') }}">
-                                <span class="d-none d-sm-inline ">{{ \App\CPU\translate('Back to Shipping') }}</span>
-                                <span class="d-inline d-sm-none">{{ \App\CPU\translate('Back') }}</span>
-                            </a>
-                        </div>
                         <div class="col-4"></div>
                     </div>
                 </div>
@@ -641,7 +642,7 @@
 
         $(".submit_payment").click(function() {
             var checked =  $(".wallet_payment:checkbox").is(':checked');
-            console.log(used_balance, remain_balance);
+            // console.log(used_balance, remain_balance);
             if (checked) {
                 if(remain_balance > 0){
                     // alert("wallet_payment");
@@ -649,8 +650,11 @@
                     $("#wallet_payment").submit();
                 }
                 else{
+                    
+                        
                     // alert("razorpay_payment_form");
                     $("#razorpay_payment_form").submit();
+                    
                     
                 }
             } else {  

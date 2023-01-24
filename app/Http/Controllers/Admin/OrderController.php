@@ -10,6 +10,8 @@ use App\Model\AdminWallet;
 use App\Model\BusinessSetting;
 use App\Model\DeliveryMan;
 use App\Model\Order;
+use App\Model\Brand;
+use App\Model\Category;
 use App\Model\OrderDetail;
 use App\Model\OrderTransaction;
 use App\Model\Product;
@@ -425,7 +427,7 @@ class OrderController extends Controller
             return back();
         }
 
-        // return $orders;
+       
 
         $storage = array();
 
@@ -442,17 +444,52 @@ class OrderController extends Controller
                 $sku = "";
                 $p_name = "";
                 $p_code ="";
+                $category ="";
+                $sub_category ="";
+                $sub_sub_category ="";
+                $brand ="";
                 $mrp = 0;
                 $sell_price = 0;
+                $p_b= [];
               
                 // $product_detail = json_decode($od_dtls->product_details);
-            $pDtls = gettype($od_dtls->product_details) == "string" ? json_decode($od_dtls->product_details) : $od_dtls->product_details;
+                $pDtls = gettype($od_dtls->product_details) == "string" ? json_decode($od_dtls->product_details) : $od_dtls->product_details;
+
+                if(isset($pDtls->brand_id))
+                {
+                    $brand = Brand::find($pDtls->brand_id);
+
+                }
+
+                if(isset($pDtls->category_ids))
+                {
+                        $p_brand = gettype($pDtls->category_ids) == "string" ? json_decode($pDtls->category_ids) : $pDtls->category_ids;
+               
+                        // for categories name
+                        foreach ($p_brand as $key => $b) {
+                            array_push($p_b, $b);
+                        }
+                        
+                    //   return  $p_b[2];
+                       $category = Category::find($p_b[0]->id);
+                       if(isset($p_b[1]))
+                       {
+                           $sub_category = Category::find($p_b[1]->id);
+                       }
+                       if(isset($p_b[2]))
+                       {
+                           $sub_sub_category = Category::find($p_b[2]->id);
+                       }
+                      
+
+                }
+              
 
                 if(isset($pDtls->variation))
                 {
                     $vrtns = gettype($pDtls->variation) == "string" ? json_decode($pDtls->variation) : $pDtls->variation;
                 }
-               $vartns_dtls =  array_values(array_filter($vrtns, function($f) use ($od_dtls){
+                $vartns_dtls =  array_values(array_filter($vrtns, function($f) use ($od_dtls){
                     return $f->type == $od_dtls->variant;}));
                 // return $od_dtls;
                 if(isset($vartns_dtls) && is_array($vartns_dtls) && count($vartns_dtls) > 0)
@@ -463,16 +500,22 @@ class OrderController extends Controller
                 {
                     $mrp = isset($vartns_dtls[0]->price) ? $vartns_dtls[0]->price : 0;
                 }
-                if(isset($od_dtls->price) && isset($od_dtls->tax) && isset($od_dtls->discount))
-                {
-                    $sell_price = ($od_dtls->price + $od_dtls->tax ) -  $od_dtls->discount;
-                }
+                // if(isset($od_dtls->price) && isset($od_dtls->tax) && isset($od_dtls->discount))
+                // {
+                //     $sell_price = ($od_dtls->price + $od_dtls->tax ) -  $od_dtls->discount;
+                // }
+
+
                 $p_name = isset($pDtls->name) ?  $pDtls->name : "";
                 $p_code = isset($pDtls->code) ?  $pDtls->code : "";
+               
+
+               
+
                 // die;
                 $storage[] = [
                     'Order Date' =>  isset($item->created_at) ? date_format($item->created_at,"d-m-Y h:i:s A") : "-",
-                    'Shippind  Date' =>  isset($item->shipping_date) ? $item->shipping_date : "-",
+                    'Delivery  Date' =>  isset($item->shipping_date) ? $item->shipping_date : "-",
                     'Store  Name' =>  $item->shop_name,
                     'order_id'=>$item->id,
                     'Customer Name'=> isset($item->customer) ? $item->customer->f_name. ' '.$item->customer->l_name:'not found',
@@ -480,14 +523,16 @@ class OrderController extends Controller
                     'Customer Email'=> isset($item->customer->email) ? $item->customer->email :'not found',
                     'SKU Code'=>   $sku,
                     'Item Name'=>   $p_name,
+                    'Brand'=>   $brand,
                     'Size'=>  ( isset($od_dtls->variant) ?  $od_dtls->variant : "" ) . ( isset($pDtls->unit) ?  $pDtls->unit : "" ),
                     'Quantity'=>   isset($od_dtls->qty) ?  $od_dtls->qty : "",
                     'MRP'=>   Helpers::currency_converter($mrp),
-                    'Selling Price'=>   Helpers::currency_converter($sell_price),
-                    'Shipping Cost' => Helpers::currency_converter($shipping_cost),
-                    // 'Order Amount' => Helpers::currency_converter($order_amount),
+                    // 'Selling Price'=>   Helpers::currency_converter($sell_price),
+                    // 'Shipping Cost' => Helpers::currency_converter($shipping_cost),
+                    'Total Amount' => Helpers::currency_converter($mrp * $od_dtls->qty),
                     'Discount Amount' => Helpers::currency_converter($discount_amount),
                     'Payment Method' => $item->payment_method,
+                    'Shipping Method Id' => $item->shipping_method_id,
                     'Shipping Method Name' => isset($item->shipping)? $item->shipping->title:'not found',
                     'Order Status' => $item->order_status,
                     'Latitude' => isset($item->shippingAddress)? $item->shippingAddress->latitude:'not found',
@@ -495,15 +540,12 @@ class OrderController extends Controller
                     'Order Type' => $item->order_type,
                     'City' => isset($item->shippingAddress)? $item->shippingAddress->city:'not found',
                     'Pincode' => isset($item->shippingAddress)? $item->shippingAddress->zip:'not found',
-                    // 'Category'=>   $product_detail  variation,
-                    // 'Sub Category'=>   $product_detail  variation,
-                    // 'Sub Sub Category'=>   $product_detail  variation,
+                    'Category'=>    isset($category->name) ? $category->name : "",
+                    'Sub Category'=>   isset($sub_category->name) ? $sub_category->name : "",
+                    'Sub Sub Category'=> isset($sub_sub_category->name) ? $sub_sub_category->name : "",
                     'Product Code'=>   $p_code,
                     // 'Order channnel'=>   $product_detail  variation,
-    
-    
                     // 'Coupon Code' => $item->coupon_code,
-                   
                     'Discount Type' => $item->discount_type,
                     'Extra Discount' => Helpers::currency_converter($extra_discount),
                     'Extra Discount Type' => $item->extra_discount_type,
@@ -514,9 +556,7 @@ class OrderController extends Controller
                     'Billing Address Data' => $item->billing_address_data,
                     'Shipping Type' => $item->shipping_type,
                     'Shipping Address' => isset($item->shippingAddress)? $item->shippingAddress->address:'not found',
-                    'Shipping Method Id' => $item->shipping_method_id,
                   
-                    
                     // // 'Seller Id' => $item->seller_id,
                     // // 'Seller Name' => isset($item->seller)? $item->seller->f_name. ' '.$item->seller->l_name:'not found',
                     // // 'Seller Email'  => isset($item->seller)? $item->seller->email:'not found',

@@ -12,3 +12,12 @@ yarn-error.log
 /.idea
 /.vscode
 .env
+
+storage/debugbar
+storage/framework
+storage/logs
+
+app\Providers\AppServiceProvider.php
+server.php
+
+.gitignore
