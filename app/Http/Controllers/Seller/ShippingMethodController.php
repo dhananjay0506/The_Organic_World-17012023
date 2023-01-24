@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use App\Model\Category;
 use App\Model\CategoryShippingCost;
 use App\Model\ShippingType;
+use App\Model\Seller;
 
 class ShippingMethodController extends Controller
 {
@@ -20,30 +21,69 @@ class ShippingMethodController extends Controller
     {
         $shippingMethod = Helpers::get_business_settings('shipping_method');
         $seller_id = auth('seller')->id();
+        $seller = Seller::select('sellers.*')->where('id',$seller_id)->first();
 
-        if($shippingMethod=='sellerwise_shipping')
-        {
-            $all_category_ids = Category::where(['position' => 0])->pluck('id')->toArray();
-            $category_shipping_cost_ids = CategoryShippingCost::where('seller_id',$seller_id)->pluck('category_id')->toArray();
-            foreach($all_category_ids as $id)
+        if ($seller->parent_id == 0){
+
+            if($shippingMethod=='sellerwise_shipping')
             {
-                if(!in_array($id,$category_shipping_cost_ids))
+                $all_category_ids = Category::where(['position' => 0])->pluck('id')->toArray();
+                $category_shipping_cost_ids = CategoryShippingCost::where('seller_id',$seller->parent_id)
+                                        ->pluck('category_id')
+                                        ->toArray();
+                foreach($all_category_ids as $id)
                 {
-                    $new_category_shipping_cost = new CategoryShippingCost;
-                    $new_category_shipping_cost->seller_id = $seller_id;
-                    $new_category_shipping_cost->category_id = $id;
-                    $new_category_shipping_cost->cost = 0;
-                    $new_category_shipping_cost->save();
+                    if(!in_array($id,$category_shipping_cost_ids))
+                    {
+                        $new_category_shipping_cost = new CategoryShippingCost;
+                        $new_category_shipping_cost->seller_id = $seller_id;
+                        $new_category_shipping_cost->category_id = $id;
+                        $new_category_shipping_cost->cost = 0;
+                        $new_category_shipping_cost->save();
+                    }
                 }
+                $all_category_shipping_cost = CategoryShippingCost::where('seller_id',$seller->parent_id)->get();
+                $seller_shipping = ShippingType::where('seller_id',$seller->parent_id)->first();
+                $shippingType = isset($seller_shipping)==true? $seller_shipping->shipping_type: 'order_wise';
+
+                $id = Seller::select('id')->where('id',$seller->id)->orWhere('parent_id',$seller->id)->pluck('id');
+                $shipping_methods = ShippingMethod::select('*')
+                                            ->whereIn('creator_id',$id)
+                                            ->where('creator_type','seller')
+                                            ->latest()
+                                            ->paginate(Helpers::pagination_limit());
+
+                return view('seller-views.shipping-method.add-new', compact('shipping_methods','all_category_shipping_cost','shippingType'));
+            }else{
+                return back();
             }
-            $all_category_shipping_cost = CategoryShippingCost::where('seller_id',$seller_id)->get();
-            $seller_shipping = ShippingType::where('seller_id',$seller_id)->first();
-            $shippingType = isset($seller_shipping)==true? $seller_shipping->shipping_type: 'order_wise';
-            $shipping_methods = ShippingMethod::where(['creator_id' => $seller_id, 'creator_type' => 'seller'])->latest()->paginate(Helpers::pagination_limit());
-            
-            return view('seller-views.shipping-method.add-new', compact('shipping_methods','all_category_shipping_cost','shippingType'));
-        }else{
-            return back();
+        }
+        else{
+            if($shippingMethod=='sellerwise_shipping')
+            {
+                $all_category_ids = Category::where(['position' => 0])->pluck('id')->toArray();
+                $category_shipping_cost_ids = CategoryShippingCost::where('seller_id',$seller_id)->pluck('category_id')->toArray();
+                foreach($all_category_ids as $id)
+                {
+                    if(!in_array($id,$category_shipping_cost_ids))
+                    {
+                        $new_category_shipping_cost = new CategoryShippingCost;
+                        $new_category_shipping_cost->seller_id = $seller_id;
+                        $new_category_shipping_cost->category_id = $id;
+                        $new_category_shipping_cost->cost = 0;
+                        $new_category_shipping_cost->save();
+                    }
+                }
+                $all_category_shipping_cost = CategoryShippingCost::where('seller_id',$seller_id)->get();
+                $seller_shipping = ShippingType::where('seller_id',$seller_id)->first();
+                $shippingType = isset($seller_shipping)==true? $seller_shipping->shipping_type: 'order_wise';
+                $shipping_methods = ShippingMethod::where(['creator_id' => $seller_id, 'creator_type' => 'seller'])->latest()->paginate(Helpers::pagination_limit());
+
+                return view('seller-views.shipping-method.add-new', compact('shipping_methods','all_category_shipping_cost','shippingType'));
+            }else{
+                return back();
+            }
+
         }
 
     }

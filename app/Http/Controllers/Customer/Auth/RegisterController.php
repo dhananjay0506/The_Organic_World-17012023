@@ -144,24 +144,26 @@ class RegisterController extends Controller
                 }
 
                 Toastr::success('Verification Successfully Done');
+                if (isset($user) && $user->is_active) {
+                    if (auth('customer')->attempt(['email' => $user->email])){
+                            session()->put('wish_list', Wishlist::where('customer_id',$user->id)->pluck('product_id')->toArray());
+                            Toastr::info('Welcome to ' . Helpers::get_business_settings('company_name') . '!');
+                            CartManager::cart_to_db();
+                            return redirect(route('home'));
+                    }
+                    else{
+                        return redirect(route('customer.auth.login'));
+                    }
+                }
+                else{
+                    return redirect(route('customer.auth.login'));
+                }
+
             } else {
                 Toastr::error('Verification code/ OTP mismatched');
-            }
-
-        }
-        if (isset($user) && $user->is_active) {
-            if (auth('customer')->attempt(['email' => $user->email])){
-                    session()->put('wish_list', Wishlist::where('customer_id',$user->id)->pluck('product_id')->toArray());
-                    Toastr::info('Welcome to ' . Helpers::get_business_settings('company_name') . '!');
-                    CartManager::cart_to_db();
-                    return redirect(route('home'));
-            }
-            else{
                 return redirect(route('customer.auth.login'));
             }
-        }
-        else{
-            return redirect(route('customer.auth.login'));
+
         }
 
     }

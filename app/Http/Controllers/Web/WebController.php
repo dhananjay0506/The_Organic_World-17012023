@@ -61,7 +61,7 @@ class WebController extends Controller
         //  return "hii";
 
 
-        // if(!(Session::has('pincode'))){        
+        // if(!(Session::has('pincode'))){
         //     session()->put('pincode', '560001');
         // }
 
@@ -80,7 +80,7 @@ class WebController extends Controller
         });
 
         // return $home_categories;
-        
+
         //products based on top seller
         $top_sellers = Seller::approved()->with('shop')
             ->withCount(['orders'])->orderBy('orders_count', 'DESC')->take(12)->get();
@@ -121,7 +121,7 @@ class WebController extends Controller
             ->orderBy('products.id', 'desc')->take(8)->get();
         }
         $categories = Category::where('position', 0)->priority()->take(11)->get();
-        
+
         // $sub_categories = Category::where('position',1)->get();
         // $sub_sub_categories = Category::where('position',2)->get();
 
@@ -136,7 +136,7 @@ class WebController extends Controller
             ->orderBy("count", 'desc')
             ->take(4)
             ->get();
-            
+
         //Top rated
         $topRated = Review::with('product')
             ->whereHas('product', function ($query) {
@@ -172,7 +172,7 @@ class WebController extends Controller
             // ->where('products.added_by','=','seller')
             // ->first();
         }
-        
+
         $porduct_data = Product::active()->with(['reviews']);
         if(isset($request->city) && $request->city > 0)
         {
@@ -195,7 +195,7 @@ class WebController extends Controller
 
         $Fruits_vegitables = $porduct_data->whereIn('products.id', $product_ids)->get();
 
-        // 
+        //
         if(isset($request->city) && $request->city > 0)
         {
             // $Fruits_vegitables = $porduct_data
@@ -259,7 +259,7 @@ class WebController extends Controller
                      }
                  }
              }
- 
+
           $home_essential = $porduct_data_home_essential->whereIn('products.id', $product_ids)->get();
           if(isset($request->city) && $request->city > 0)
          {
@@ -275,9 +275,9 @@ class WebController extends Controller
           // Dal Grains oil and flours
 
        $dal_items = Category::where('parent_id', '32')->get();
-      
 
-      
+
+
         return view('web-views.home', compact('featured_products','dal_items','Fruits_vegitables','sanck_sweet','home_essential', 'topRated', 'bestSellProduct', 'latest_products', 'categories', 'brands', 'deal_of_the_day', 'top_sellers', 'home_categories'));
     }
 
@@ -285,20 +285,20 @@ class WebController extends Controller
     {
         $Shop_pincode = session()->get('pincode');
 
-        $deal = FlashDeal::with(['products.product.reviews', 'products.product.shop_pincode'=> function($query_one){            
+        $deal = FlashDeal::with(['products.product.reviews', 'products.product.shop_pincode'=> function($query_one){
                                 $query_one->select('shop_id','pincode');
                                 $query_one->where('pincode',session()->get('pincode'));
-                                
 
-        }])->with(['products.product' => function($query){            
+
+        }])->with(['products.product' => function($query){
             $query->active();
             }])
-            
+
             ->where(['id' => $id, 'status' => 1])
             ->whereDate('start_date', '<=', date('Y-m-d'))
             ->whereDate('end_date', '>=', date('Y-m-d'))
             ->first();
-// echo $de/al; 
+// echo $de/al;
 // exit;
 // return $deal;
         $discountPrice = FlashDealProduct::with(['product'])->whereHas('product', function ($query) {
@@ -440,7 +440,7 @@ class WebController extends Controller
             }
         }
 
-        
+
 
         if (count($cart_group_ids) > 0) {
             // return "hii";
@@ -527,6 +527,7 @@ class WebController extends Controller
 
         return view('web-views.checkout-complete');
     }
+
     public function checkout_complete_wallet(Request $request = null)
     {
         $cartTotal = CartManager::cart_grand_total();
@@ -584,9 +585,10 @@ class WebController extends Controller
             $cart_shipping = json_decode($cart_shipping);
         }
 
-    //    return $cart_shipping;
-   
+        //    return $cart_shipping;
+
         if (auth('customer')->check() && Cart::where(['customer_id' => auth('customer')->id()])->count() > 0) {
+            // return $cart_shipping;
             return view('web-views.shop-cart',compact('cart_shipping'));
         }
         Toastr::info(translate('no_items_in_basket'));
@@ -760,7 +762,7 @@ class WebController extends Controller
                             ->where('shop_pincodes.pincode',$Shop_pincode)
                             ->where('slug', $slug)->first();
 
-       
+
 
         if ($product != null) {
             $countOrder = OrderDetail::where('product_id', $product->id)->count();
@@ -790,7 +792,7 @@ class WebController extends Controller
         $Shop_pincode = session()->get('pincode');
         $request['sort_by'] == null ? $request['sort_by'] == 'latest' : $request['sort_by'];
 
-        $porduct_data = Product::select('products.*','shop_pincodes.id as shop_pincodes_id','shop_pincodes.pincode')->active()->with(['reviews']) 
+        $porduct_data = Product::select('products.*','shop_pincodes.id as shop_pincodes_id','shop_pincodes.pincode')->active()->with(['reviews'])
                                 ->join('shop_pincodes','shop_pincodes.shop_id','products.shop_id')
                                 ->where('shop_pincodes.pincode',$Shop_pincode);
 
@@ -854,7 +856,7 @@ class WebController extends Controller
 
         if ($request['data_from'] == 'featured') {
             $query = Product::with(['reviews'])
-                            ->select('products.*','shop_pincodes.id as a shop_pincodes_id','shop_pincodes.pincode')    
+                            ->select('products.*','shop_pincodes.id as a shop_pincodes_id','shop_pincodes.pincode')
                             ->join('shop_pincodes','shop_pincodes.shop_id','products.shop_id')
                             ->where('shop_pincodes.pincode',$Shop_pincode)
                             ->active()
@@ -865,7 +867,7 @@ class WebController extends Controller
             $featured_deal_id = FlashDeal::where(['status'=>1])->where(['deal_type'=>'feature_deal'])->pluck('id')->first();
             $featured_deal_product_ids = FlashDealProduct::where('flash_deal_id',$featured_deal_id)->pluck('product_id')->toArray();
             $query = Product::with(['reviews'])
-                            ->select('products.*','shop_pincodes.id as a shop_pincodes_id','shop_pincodes.pincode')            
+                            ->select('products.*','shop_pincodes.id as a shop_pincodes_id','shop_pincodes.pincode')
                             ->join('shop_pincodes','shop_pincodes.shop_id','products.shop_id')
                             ->where('shop_pincodes.pincode',$Shop_pincode)
                             ->active()
@@ -874,7 +876,7 @@ class WebController extends Controller
 
         if ($request['data_from'] == 'search') {
             $key = explode(' ', $request['name']);
-            $product_ids = Product::select('products.*','shop_pincodes.id as a shop_pincodes_id','shop_pincodes.pincode')            
+            $product_ids = Product::select('products.*','shop_pincodes.id as a shop_pincodes_id','shop_pincodes.pincode')
             ->join('shop_pincodes','shop_pincodes.shop_id','products.shop_id')
             ->where(function ($q) use ($Shop_pincode) {
                     $q->orWhere('pincode', $Shop_pincode);
@@ -887,7 +889,7 @@ class WebController extends Controller
 
             if($product_ids->count()==0)
             {
-                
+
                 $product_ids = Translation::where('translationable_type', 'App\Model\Product')
                     ->where('key', 'name')
                     ->where(function ($q) use ($key) {

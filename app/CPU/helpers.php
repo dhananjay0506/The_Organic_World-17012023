@@ -182,7 +182,8 @@ class Helpers
         if ($type == 'admin') {
             return ShippingMethod::where(['status' => 1])->where(['creator_type' => 'admin'])->get();
         } else {
-            return ShippingMethod::where(['status' => 1])->where(['creator_id' => $seller_id, 'creator_type' => $type])->get();
+            $id = Seller::select('id')->where('id',$seller_id)->orWhere('parent_id',$seller_id)->pluck('id');
+            return ShippingMethod::where(['status' => 1])->whereIn('creator_id',$id)->where('creator_type',$type)->get();
         }
     }
 
@@ -403,7 +404,7 @@ class Helpers
             $token = rand(1000, 9999);
             if($customer_phone != ''){
                 SMS_module::send( $customer_phone, $token, $status,$order_id);
-                
+
                 // Mail::to($customer['email'])->send(new \App\Mail\OrderConfirmation($order_id));
 
             }

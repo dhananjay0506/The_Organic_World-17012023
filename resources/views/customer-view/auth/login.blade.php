@@ -529,6 +529,7 @@
             console.log('hii');
             $('header').addClass('d-none');
             document.getElementById('anouncement').setAttribute('style', 'display:none !important');
+            // document.getElementById('anouncement_2').setAttribute('style', 'display:none !important');
             $('.bg-secondary-light').addClass('d-none');
             $('.footer').addClass('d-none');
             $("#phonenumber").hide();

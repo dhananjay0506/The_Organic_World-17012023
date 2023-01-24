@@ -2120,4 +2120,13 @@
   'associated_with_your_account' => 'Associated with your account',
   'Phone_number' => 'Phone number',
   'Proceed' => 'Proceed',
+  'Welcome_Back' => 'Welcome Back',
+  'Rohan_Khanna!' => 'Rohan Khanna!',
+  'send_to_your_number' => 'Send to your number',
+  'Success' => 'Success',
+  'Danger' => 'Danger',
+  'Light' => 'Light',
+  'Dark' => 'Dark',
+  'Chatting Page' => 'Chatting Page',
+  'Chatting List' => 'Chatting List',
 );
