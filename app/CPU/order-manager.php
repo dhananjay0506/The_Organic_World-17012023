@@ -270,11 +270,41 @@ class OrderManager
 
             $seller_data = Cart::where(['cart_group_id' => $cart_group_id])->first();
 
-            $shipping_method = CartShipping::where(['cart_group_id' => $cart_group_id])->first();
+       //11-01-2023
+         $order_amount = CartManager::cart_grand_total($cart_group_id) - $discount;
 
-            //11-01-2023
-            $order_amount = CartManager::cart_grand_total($cart_group_id) - $discount;
 
+          $shipping_cost = CartManager::get_shipping_cost($data['cart_group_id']);
+
+           $order_amount = $order_amount - $shipping_cost;
+        //
+        $Date = now();
+        $shippingMethod = ShippingMethod::where('id', $shipping_method->shipping_method_id)->first();
+        $shipping_date = date_add($Date,date_interval_create_from_date_string("$shippingMethod->no_of_days days"));
+        $shipping_date = date_format($shipping_date,"y-m-d h:i:sa");
+
+        if($shippingMethod->free_shipping_status == 1){
+            if($shippingMethod->minimum_cart_value < $order_amount){
+                        $shipping_cost = 0;
+                        $order_amount = $order_amount;
+                    }
+                    else{
+                        $shipping_cost = $shipping_cost;
+                        $order_amount = $order_amount + $shipping_cost;
+                    }
+        }
+        else{
+            $shipping_cost = $shipping_cost;
+            $order_amount = $order_amount + $shipping_cost;
+        }
+
+        // return $order_amount;
+        if (isset($shipping_method)) {
+            $shipping_method_id = $shipping_method->shipping_method_id;
+
+        } else {
+            $shipping_method_id = 0;
+        }
 
             $shipping_cost = CartManager::get_shipping_cost($data['cart_group_id']);
 

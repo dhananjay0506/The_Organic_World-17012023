@@ -87,7 +87,6 @@ Route::group(['namespace' => 'Seller', 'prefix' => 'seller', 'as' => 'seller.'],
             Route::get('add-delivery-man/{order_id}/{d_man_id}', 'OrderController@add_delivery_man')->name('add-delivery-man');
 
             Route::get('export-order-data/{status}', 'OrderController@bulk_export_data')->name('order-bulk-export');
-
             Route::get('detail-export-order-data/{status}', 'OrderController@detail_bulk_export_data')->name('detail-order-bulk-export');
         });
         //pos management

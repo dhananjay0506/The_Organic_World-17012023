@@ -197,6 +197,14 @@ Route::post('payment-razor/payment2', 'RazorPayController@payment_mobile')->name
 Route::get('payment-razor/success', 'RazorPayController@success')->name('payment-razor.success');
 Route::get('payment-razor/fail', 'RazorPayController@success')->name('payment-razor.fail');
 
+//20-01-2023
+
+Route::get('paywithrazorpay-mobile', 'RazorPayControllerMobile@payWithRazorpay')->name('paywithrazorpay-mobile');
+Route::post('payment-razor-mobile', 'RazorPayControllerMobile@payment')->name('payment-razor-mobile');
+Route::post('payment-razor/payment2-mobile', 'RazorPayControllerMobile@payment_mobile')->name('payment-razor.payment2-mobile');
+Route::get('payment-razor/success-mobile', 'RazorPayControllerMobile@success')->name('payment-razor.success-mobile');
+Route::get('payment-razor/fail-mobile', 'RazorPayControllerMobile@success')->name('payment-razor.fail-mobile');
+
 Route::get('payment-success', 'Customer\PaymentController@success')->name('payment-success');
 Route::get('payment-fail', 'Customer\PaymentController@fail')->name('payment-fail');
 

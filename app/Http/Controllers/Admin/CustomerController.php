@@ -69,6 +69,34 @@ class CustomerController extends Controller
         Toastr::error('Customer not found!');
         return back();
     }
+    public function edit(Request $request, $id)
+    {
+
+        $customer = User::find($id);
+
+        return view('admin-views.customer.customer-edit', compact('customer'));
+
+       
+    }
+    public function update(Request $request, $id)
+    {
+        $user = User::find($id);
+      
+        $userDetails = [
+            'name'      => $request->name,
+            'f_name'    => $request->f_name,
+            'l_name'    => $request->l_name,
+            'email'     => $request->email,
+            'phone'     => $request->phone,
+            
+        ];
+        
+            User::where(['id' => $user->id])->update($userDetails);
+            Toastr::info(\App\CPU\translate('updated_successfully'));
+            return redirect()->route('admin.customer.list');
+        
+    }
+
     public function delete($id)
     {
         $customer = User::find($id);

@@ -53,10 +53,49 @@
     <div class="row mt-5">
         @php($User = \App\User::where('id','=',$_GET['customer_id'])->first())
        
+
+        @php($coupon_discount = session()->has('coupon_discount') ? session('coupon_discount') : 0)
+        @php($amount = \App\CPU\CartManager::cart_grand_total() - $coupon_discount)
+
+        {{-- 17-01-2023 --}}
+         @php($sub_total = 0)
+         @php($total_tax = 0)
+         @php($total_shipping_cost = 0)
+         @php($total_discount_on_product = 0)
+         @php($cart = \App\CPU\CartManager::get_cart())
+         @php($shipping_cost = \App\CPU\CartManager::get_shipping_cost())
+         @if ($cart->count() > 0)
+             @foreach ($cart as $key => $cartItem)
+                 @php($sub_total += $cartItem['price'] * $cartItem['quantity'])
+                 @php($total_tax += $cartItem['tax'] * $cartItem['quantity'])
+                 @php($total_discount_on_product += $cartItem['discount'] * $cartItem['quantity'])
+             @endforeach
+             @php($total_shipping_cost = $shipping_cost)
+         @else
+             <span>{{ \App\CPU\translate('empty_cart') }}</span>
+         @endif
+
+
+         @if (session()->has('coupon_discount'))
+             @php($coupon_dis = session()->has('coupon_discount') ? session('coupon_discount') : 0)
+         @else
+             @php($coupon_dis = 0)
+         @endif
+         {{-- @php($total_price = $sub_total + $total_tax + $total_shipping_cost - $coupon_dis - $total_discount_on_product) --}}
+         @php($total_price = $sub_total + $total_tax  - $coupon_dis - $total_discount_on_product)
+
+         @if ($cart_shipping->free_shipping_status == 1)
+             @if ($total_price > $cart_shipping->minimum_cart_value)
+                 @php($amount = \App\CPU\CartManager::cart_grand_total() - $coupon_discount - $cart_shipping->shipping_cost)
+             @else
+                 @php($amount = \App\CPU\CartManager::cart_grand_total() - $coupon_discount)
+             @endif
+         @endif
+        {{-- 17-01-2023 --}}
         
         @php($config=\App\CPU\Helpers::get_business_settings('wallet_status'))
         @if($config==1)
-            <div class="col-md-6 mb-4" style="cursor: pointer">
+            {{-- <div class="col-md-6 mb-4" style="cursor: pointer">
                 <div class="card">
                     <div class="card-body" style="height: 100px">
                         
@@ -69,7 +108,81 @@
                         
                     </div>
                 </div>
+            </div> --}}
+
+
+            {{-- 17-01-2023 --}}
+            <div class="col-md-12 mb-4" style="cursor: pointer">
+                <div>
+                    <input type="checkbox" class="wallet_payment">
+                    &nbsp;<label>{{ \App\CPU\translate('Pay_using_wallet') }}</label>
+                </div>
+                @php($wltBalance = $User->wallet_balance)
+                @php($remain_balance = $wltBalance - $amount)
+
+                <div class="row" id="available_balence">
+                    <div class="col-lg-6" >
+                        <label for="">{{ \App\CPU\translate('Available_balance') }}</label>
+
+                        <label>{{ \App\CPU\Helpers::currency_converter($wltBalance) }}</label>
+                    </div>
+                </div>
+               
+                     
+                <div class="row" id="wallet_balence_checked">
+                    <div class="col-lg-6">
+                        <label>{{ \App\CPU\translate('remaining_balance :') }}</label>
+
+                        {{-- for send value in razorpay, this value is wallet amount --}}
+
+                        @php($razorpay_amount = ($wltBalance > $amount) ? 0 : $amount - $wltBalance) 
+                        @php ($wallet =  $amount - $razorpay_amount)
+                        
+                     
+
+                       
+                        @if($wltBalance < $amount)
+                            @php( $wltBalance = $wltBalance)
+                        @else
+                            @php( $wltBalance = $wltBalance - $remain_balance)
+                        @endif
+
+                        @if($remain_balance < 0)
+                            @php($remain_balance = 0)
+                        @endif
+
+                        <label >{{ \App\CPU\Helpers::currency_converter($remain_balance) }}</label>
+                        <input class="remain_balance" type="hidden" value="{{ round(\App\CPU\Convert::usdToinr($remain_balance)) * 100 }}">
+                       
+                    </div>
+                    <div class="col-lg-6" >
+                       
+                            <label for="">{{\App\CPU\translate('You_used : ')}}</label>
+                            <label> {{\App\CPU\Helpers::currency_converter($wltBalance)}}</label>
+                            <input class="used_balance" type="hidden" value="{{\App\CPU\Helpers::currency_converter($wltBalance)}}">
+                            <input class="wallet_paybale" type="hidden" value="{{\App\CPU\Helpers::currency_converter($wltBalance)}}">
+                            <input type="hidden" name="user_phone" value="{{!empty($user->phone) ? $user->phone : '' }}">
+
+                       
+                    </div>
+                </div>
+                {{-- <div class="card">
+                    <div class="card-body" > --}}
+                {{-- <form action="{{route('checkout-complete-wallet')}}" method="get" class="needs-validation"> --}}
+                <button class="btn btn-block click-if-alone" type="submit">
+                </button>
+
+
+                <form action="{{ route('checkout-complete-wallet') }}" method="get"
+                    class="needs-validation" id="wallet_payment">
+                    @csrf
+                </form>
+
+                {{-- </form> --}}
+                {{-- </div>
+                </div> --}}
             </div>
+            {{-- 17-01-2023 --}}
         @endif
         
         @php($user=\App\CPU\Helpers::get_customer())
@@ -108,8 +221,6 @@
             </div>
         @endif
 
-        @php($coupon_discount = session()->has('coupon_discount') ? session('coupon_discount') : 0)
-        @php($amount = \App\CPU\CartManager::cart_grand_total() - $coupon_discount)
 
         @php($config=\App\CPU\Helpers::get_business_settings('stripe'))
         @if($config['status'])
@@ -152,14 +263,15 @@
         @php($usd=\App\Model\Currency::where(['code'=>'usd'])->first())
         @if(isset($inr) && isset($usd) && $config['status'])
 
-            <div class="col-md-6 mb-4" style="cursor: pointer">
+            <div class="col-md-6 mb-4 d-none" style="cursor: pointer">
                 <div class="card">
                     <div class="card-body" style="height: 100px">
-                        <form action="{!!route('payment-razor')!!}" method="POST">
+                        {{-- <form action="{!!route('payment-razor')!!}" method="POST">
                         @csrf
                         <!-- Note that the amount is in paise = 50 INR -->
                             <!--amount need to be in paisa-->
-                            <input type="hiiden" name="user_phone" value="{{!empty($User->phone) ? $User->phone : ''}}">
+                            <input type="hidden" name="user_phone" value="{{!empty($User->phone) ? $User->phone : ''}}">
+                            <input type="hidden" name="user_id" value="{{!empty($User->id) ? $User->id : ''}}">
                             <script src="https://checkout.razorpay.com/v1/checkout.js"
                                     data-key="{{ \Illuminate\Support\Facades\Config::get('razor.razor_key') }}"
                                     data-amount="{{(round(\App\CPU\Convert::usdToinr($amount)))*100}}"
@@ -171,6 +283,40 @@
                                     data-prefill.email="{{$user->email}}"
                                     data-theme.color="#ff7529">
                             </script>
+                        </form> --}}
+                        <form action="{!! route('payment-razor-mobile') !!}" method="POST" id="razorpay_payment_form">
+                            @csrf
+                            <!-- Note that the amount is in paise = 50 INR -->
+                            <!--amount need to be in paisa-->
+                            <input type="" name="user_phone" value="{{!empty($user->phone) ? $user->phone : '' }}">
+                            <input type="" name="wallet_balence" value="{{ $wallet }}">
+                            <input type="" name="user_id" value="{{!empty($user->id) ? $user->id : '' }}">
+                            <script src="https://checkout.razorpay.com/v1/checkout.js" id="razorpay_script"
+                                data-key="{{ \Illuminate\Support\Facades\Config::get('razor.razor_key') }}"
+                                data-amount="{{ round(\App\CPU\Convert::usdToinr($razorpay_amount)) * 100 }}"
+                                data-wallet="{{ $wallet }}"
+                                data-buttontext="Pay {{ \App\CPU\Convert::usdToinr($razorpay_amount) * 100 }} INR"
+                                data-name="{{ \App\Model\BusinessSetting::where(['type' => 'company_name'])->first()->value }}" data-description=""
+                                data-image="{{ asset('storage/app/public/company/' . \App\Model\BusinessSetting::where(['type' => 'company_web_logo'])->first()->value) }}"
+                                data-prefill.name="{{$user->f_name}}"
+                                data-prefill.email="{{$user->email}}" data-theme.color="#ff7529" ></script>
+                        </form>
+                        <form action="{!! route('payment-razor-mobile') !!}" method="POST" id="razorpay_payment_form_2">
+                            @csrf
+                            <!-- Note that the amount is in paise = 50 INR -->
+                            <!--amount need to be in paisa-->
+                            <input type="hidden" name="user_phone" value="{{!empty($user->phone) ? $user->phone : '' }}">
+                            <input type="hidden" name="wallet_balence" value="0">
+                            <input type="" name="user_id" value="{{!empty($user->id) ? $user->id : '' }}">
+                            <script src="https://checkout.razorpay.com/v1/checkout.js" id="razorpay_script"
+                                data-key="{{ \Illuminate\Support\Facades\Config::get('razor.razor_key') }}"
+                                data-amount="{{ round(\App\CPU\Convert::usdToinr($amount)) * 100 }}"
+                                data-wallet="0"
+                                data-buttontext="Pay {{ \App\CPU\Convert::usdToinr($amount) * 100 }} INR"
+                                data-name="{{ \App\Model\BusinessSetting::where(['type' => 'company_name'])->first()->value }}" data-description=""
+                                data-image="{{ asset('storage/app/public/company/' . \App\Model\BusinessSetting::where(['type' => 'company_web_logo'])->first()->value) }}"
+                                data-prefill.name="{{$user->f_name}}"
+                                data-prefill.email="{{$user->email}}" data-theme.color="#ff7529" ></script>
                         </form>
                         <button class="btn btn-block click-if-alone" type="button"
                                 onclick="$('.razorpay-payment-button').click()">
@@ -385,8 +531,25 @@
         @endif
     </div>
 
+    <div class="row">
+        <div class="col-4"> 
+            <button class="btn btn-primary btn-block submit_payment" >
+                <span class="" >{{ \App\CPU\translate('Pay') }}</span>
+                <span  class="button_amount text-white">{{$amount }}</span>
+               
+            </button>
+    </div>
+        {{-- <div class="col-4">
+            <a class="btn btn-block bg-custome-warming text-white" href="{{ route('checkout-details') }}">
+                <span class="d-none d-sm-inline ">{{ \App\CPU\translate('Back to Shipping') }}</span>
+                <span class="d-inline d-sm-none">{{ \App\CPU\translate('Back') }}</span>
+            </a>
+        </div> --}}
+        <div class="col-4"></div>
+    </div>
+
      <!-- Modal -->
-  <div class="modal fade" id="wallet_submit_button" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+  {{-- <div class="modal fade" id="wallet_submit_button" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
@@ -431,7 +594,7 @@
         </form>
       </div>
     </div>
-  </div>
+  </div> --}}
 </div>
 
 <script src="{{asset('public/assets/front-end')}}/vendor/jquery/dist/jquery-2.2.4.min.js"></script>
@@ -459,6 +622,71 @@
         $('.razorpay-payment-button').hide();
     }, 10)
 </script>
+
+<script>
+    $(document).ready(function() {
+     let used_balance_data       = $('.used_balance').val();
+     let used_balance            = used_balance_data.replace("\u20b9",'');
+     let remain_balance_data     = $('.remain_balance').val();
+     let remain_balance          = remain_balance_data.replace("\u20b9",'');
+
+     
+
+     $('#wallet_balence_checked').hide();
+     $('.button_amount').hide();
+     $(".wallet_payment").click(function() {
+       
+         var checked = $(this).is(':checked');
+         if (checked) {
+             
+             $('#available_balence').hide();
+             $('#wallet_balence_checked').show();
+             // $('.submit_payment_button').prop("disabled", false);
+             if(used_balance < remain_balance_data){
+                 $('#razorpay_payment').hide();
+             }
+         } else {
+             $('#available_balence').show();
+             $('#wallet_balence_checked').hide();
+             $('#razorpay_payment').show();
+             // $('.submit_payment_button').prop("disabled", true);
+         }
+         console.log({{ $razorpay_amount}});
+         console.log({{ $amount}});
+     });
+ });
+ $(document).ready(function() {
+     let used_balance_data       = $('.used_balance').val();
+     let used_balance            = used_balance_data.replace("\u20b9",'');
+     let remain_balance_data     = $('.remain_balance').val();
+     let remain_balance          = remain_balance_data.replace("\u20b9",'');
+     let wallet_paybale_data     = $('.wallet_paybale').val();
+     let wallet_paybale          = wallet_paybale_data.replace("\u20b9",'');
+     let amount = <?php echo json_encode($amount); ?>;
+
+    
+
+     $(".submit_payment").click(function() {
+         var checked =  $(".wallet_payment:checkbox").is(':checked');
+        //  console.log(used_balance, remain_balance);
+         if (checked) {
+             if(remain_balance > 0){
+                 // alert("wallet_payment");
+
+                 $("#wallet_payment").submit();
+             }
+             else{
+                 // alert("razorpay_payment_form");
+                 $("#razorpay_payment_form").submit();
+                 
+             }
+         } else {  
+         
+             $("#razorpay_payment_form_2").submit();
+         }
+     });
+ });
+ </script>
 
 <script type="text/javascript">
     function BkashPayment() {

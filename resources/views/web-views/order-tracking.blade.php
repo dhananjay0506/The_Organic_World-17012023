@@ -180,8 +180,8 @@
             <div class="col-sm-4">
                 <div class="pt-2 pb-2 text-center rounded-lg">
                     <span class="font-weight-medium text-dark mr-2"> {{ \App\CPU\translate('Estimated Delivary Date')}}: </span> <br>
-                    <span class="text-uppercase"
-                          style="font-weight: 600; color: {{$web_config['primary_color']}}">{{Carbon\Carbon::createFromFormat('Y-m-d H:i:s',$orderDetails['updated_at'])->format('Y-m-d')}}</span>
+                    {{-- <span class="text-uppercase" style="font-weight: 600; color: {{$web_config['primary_color']}}">{{Carbon\Carbon::createFromFormat('Y-m-d H:i:s',$orderDetails['updated_at'])->format('Y-m-d')}}</span> --}}
+                    <span class="text-uppercase" style="font-weight: 600; color: {{$web_config['primary_color']}}">{{Carbon\Carbon::createFromFormat('Y-m-d H:i:s',$orderDetails['shipping_date'])->format('Y-m-d')}}</span>
                 </div>
             </div>
         </div>

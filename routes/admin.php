@@ -217,6 +217,8 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'as' => 'admin.'], fu
             Route::get('list', 'CustomerController@customer_list')->name('list');
             Route::post('status-update', 'CustomerController@status_update')->name('status-update');
             Route::get('view/{user_id}', 'CustomerController@view')->name('view');
+            Route::get('edit/{user_id}', 'CustomerController@edit')->name('edit');
+            Route::post('update/{user_id}', 'CustomerController@update')->name('update');
             Route::delete('delete/{id}','CustomerController@delete')->name('delete');
             Route::get('subscriber-list', 'CustomerController@subscriber_list')->name('subscriber-list');
             Route::get('customer-settings','CustomerController@customer_settings')->name('customer-settings');
