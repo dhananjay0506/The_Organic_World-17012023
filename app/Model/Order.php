@@ -60,4 +60,9 @@ class Order extends Model
     {
         return $this->belongsTo(DeliveryMan::class,'delivery_man_id');
     }
+
+    public function orderItems()
+    {
+        return $this->hasMany(OrderDetail::class);
+    }
 }

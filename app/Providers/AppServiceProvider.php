@@ -19,9 +19,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        if ($this->app->isLocal()) {
-            $this->app->register(\Amirami\Localizator\ServiceProvider::class);
-        }
+        // if ($this->app->isLocal()) {
+        //     $this->app->register(\Amirami\Localizator\ServiceProvider::class);
+        // }
+        $this->app->bind('path.public', function() {
+            return base_path().'/';
+        });
     }
 
     /**

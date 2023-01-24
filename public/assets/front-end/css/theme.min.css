@@ -8482,6 +8482,10 @@ a.bg-accent:hover, a.bg-accent:focus, button.bg-accent:hover, button.bg-accent:f
     margin-left: 3rem !important
 }
 
+.mt-6, .my-6 {
+    margin-top: 7rem !important
+}
+
 .m-10 {
     margin: 10rem !important
 }
@@ -10909,6 +10913,38 @@ dd {
 .czi-arrow-left-circle::before {
     content: "\e907"
 }
+.czi-arrow-left-circle-c::before {
+    content: "\e907"
+}
+.czi-arrow-left-circle-c{
+    padding: 5px;
+    border-radius: 50%;
+    margin-left: -40px;
+    font-weight: bold;
+    font-size: 25px;
+}
+
+.czi-arrow-left-circle-m::before {
+    content: "\e907"
+}
+.czi-arrow-left-circle-m{
+    padding: 5px;
+    border-radius: 50%;
+    margin-left: -50px;
+    font-weight: bold;
+    font-size: 25px;
+}
+
+.czi-arrow-left-circle-w::before {
+    content: "\e907"
+}
+.czi-arrow-left-circle-w{
+    padding: 5px;
+    border-radius: 50%;
+    margin-left: -30px;
+    font-weight: bold;
+    font-size: 25px;
+}
 
 .czi-arrow-left::before {
     content: "\e908"
@@ -10916,6 +10952,40 @@ dd {
 
 .czi-arrow-right-circle::before {
     content: "\e909"
+}
+.czi-arrow-right-circle-c::before {
+    content: "\e909"
+}
+
+.czi-arrow-right-circle-c{
+    padding: 5px;
+    border-radius: 50%;
+    margin-right: -40px;
+    font-weight: bold;
+    font-size: 25px;
+}
+
+.czi-arrow-right-circle-m::before {
+    content: "\e909"
+}
+
+.czi-arrow-right-circle-m{
+    padding: 5px;
+    border-radius: 50%;
+    margin-right: -50px;
+    font-weight: bold;
+    font-size: 25px;
+}
+
+.czi-arrow-right-circle-w::before {
+    content: "\e909"
+}
+.czi-arrow-right-circle-w{
+    padding: 5px;
+    border-radius: 50%;
+    margin-right: -30px;
+    font-weight: bold;
+    font-size: 25px;
 }
 
 .czi-arrow-right::before {

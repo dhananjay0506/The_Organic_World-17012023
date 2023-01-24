@@ -6,44 +6,22 @@
 <hr class="view_border">
 @php($shippingMethod = \App\CPU\Helpers::get_business_settings('shipping_method'))
 @php(
-    $cart = \App\Model\Cart::where(['customer_id' => auth('customer')->id()])
-                            ->get()
-                            ->groupBy('cart_group_id')
+    $cart = \App\Model\Cart::where(['customer_id' => auth('customer')->id()])->get()->groupBy('cart_group_id')
 )
 
 <div class="row">
-    <style>
-       @media (max-width: 400px) {
-            .max_width{
-            width: max-content !important;
-            }
-            .max_width {
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                max-width: 160px;
-            }
-            .max_width_2 {
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                max-width: 148px;
-            }
-        }
-    </style>
     <!-- List of items-->
     <section class="col-lg-8">
-        
 
         @foreach ($cart as $group_key => $group)
             <div class="cart_information mb-3">
                 @foreach ($group as $cart_key => $cartItem)
                     @if ($shippingMethod == 'inhouse_shipping')
                         <?php
-                        
+
                         $admin_shipping = \App\Model\ShippingType::where('seller_id', 0)->first();
                         $shipping_type = isset($admin_shipping) == true ? $admin_shipping->shipping_type : 'order_wise';
-                        
+
                         ?>
                     @else
                         <?php
@@ -79,7 +57,7 @@
                         style="width: 100%">
                         <thead class="">
                             <tr class="">
-                                <th class="font-weight-bold d-none" style="width: 5%;">{{ \App\CPU\translate('SL#') }}</th>
+                                <th class="font-weight-bold" style="width: 5%;">{{ \App\CPU\translate('SL#') }}</th>
                                 @if ($shipping_type != 'order_wise')
                                     <th class="font-weight-bold" style="width: 30%;">
                                         {{ \App\CPU\translate('product_details') }}</th>
@@ -87,7 +65,7 @@
                                     <th class="font-weight-bold" style="width: 45%;">
                                         {{ \App\CPU\translate('product_details') }}</th>
                                 @endif
-                                <th class="font-weight-bold d-none d-md-block" style="width: 15%;">{{ \App\CPU\translate('unit_price') }}
+                                <th class="font-weight-bold" style="width: 15%;">{{ \App\CPU\translate('unit_price') }}
                                 </th>
                                 <th class="font-weight-bold" style="width: 15%;">{{ \App\CPU\translate('qty') }}</th>
                                 <th class="font-weight-bold" style="width: 15%;">{{ \App\CPU\translate('price') }}</th>
@@ -99,20 +77,13 @@
                             </tr>
                         </thead>
 
-                     {{-- @php($product =  \App\Model\Product::where() ) --}}
                         @foreach ($group as $cart_key => $cartItem)
-                       
-                       
-
-                        @php($Product = \App\Model\Product::select('unit')->where('products.id','=',$cartItem['product_id'])->first())
-
-                   
                             <tbody>
                                 <tr>
-                                    <td class="d-none">{{ $cart_key + 1 }}</td>
+                                    <td>{{ $cart_key + 1 }}</td>
                                     <td>
                                         <div class="d-flex">
-                                            <div style="width: 30%;" class="d-none d-md-block">
+                                            <div style="width: 30%;">
                                                 <a href="{{ route('product', $cartItem['slug']) }}">
                                                     <img style="height: 62px;"
                                                         onerror="this.src='{{ asset('public/assets/front-end/img/image-place-holder.png') }}'"
@@ -120,7 +91,7 @@
                                                         alt="Product">
                                                 </a>
                                             </div>
-                                            <div class="ml-2 text-break max_width" style="width:70%;">
+                                            <div class="ml-2 text-break" style="width:70%;">
                                                 <a
                                                     href="{{ route('product', $cartItem['slug']) }}">{{ $cartItem['name'] }}</a>
 
@@ -129,19 +100,18 @@
                                         </div>
                                         <div class="d-flex">
 
-                                            
                                             @foreach (json_decode($cartItem['variations'], true) as $key1 => $variation)
                                                 <div class="text-muted mr-2">
                                                     <span
                                                         class="{{ Session::get('direction') === 'rtl' ? 'ml-2' : 'mr-2' }}"
                                                         style="font-size: 12px;">
-                                                        {{ $key1 }} : {{ $variation }} {{$Product->unit}}</span>
+                                                        {{ $key1 }} : {{ $variation }}</span>
 
                                                 </div>
                                             @endforeach
                                         </div>
                                     </td>
-                                    <td class="d-none d-md-block">
+                                    <td>
                                         <div class=" text-accent">
                                             {{ \App\CPU\Helpers::currency_converter($cartItem['price'] - $cartItem['discount']) }}
                                             @if ($cartItem['discount'] > 0)
@@ -191,15 +161,12 @@
 
                                 @if ($shippingMethod == 'sellerwise_shipping' && $shipping_type == 'order_wise')
                                     @php($choosen_shipping = \App\Model\CartShipping::where(['cart_group_id' => $cartItem['cart_group_id']])->first())
-                                    @php($minumum_cart_value = \App\Model\CartShipping::select('minimum_cart_value','free_shipping_status')->where(['cart_group_id' => $cartItem['cart_group_id']])->join('shipping_methods','shipping_methods.id','cart_shippings.shipping_method_id')->first())
 
                                     @if (isset($choosen_shipping) == false)
                                         @php($choosen_shipping['shipping_method_id'] = 0)
                                     @endif
 
                                     @php($shippings = \App\CPU\Helpers::get_shipping_methods($cartItem['seller_id'], $cartItem['seller_is']))
-                                    
-                                    
                                     <tr>
                                         <td colspan="4">
 
@@ -224,13 +191,7 @@
                                                 </div>
                                             @endif
                                         </td>
-                                        <div>     
-                                                          {{-- {{isset($cart_shipping->minimum_cart_value) ? $cart_shipping->minimum_cart_value : 0}}                   
-                                                          {{isset($cart_shipping->free_shipping_status) ? $cart_shipping->free_shipping_status : 0}}                    --}}
-                                            <input type="hidden" class="minimum_cart_value" value="{{isset($cart_shipping->minimum_cart_value) ? $cart_shipping->minimum_cart_value : 0}}">
-                                            <input type="hidden" class="free_shipping_status" value=" {{isset($cart_shipping->free_shipping_status) ? $cart_shipping->free_shipping_status : 0}} ">
-                                        </div>
-                                        {{-- <td colspan="3">
+                                        <td colspan="3">
                                             @if ($cart_key == $group->count() - 1)
                                                 <div class="row">
                                                     <div class="col-12">
@@ -241,7 +202,7 @@
                                                     </div>
                                                 </div>
                                             @endif
-                                        </td> --}}
+                                        </td>
                                     </tr>
                                 @endif
                             </tbody>
@@ -304,7 +265,7 @@
 
         <div class="row pt-2">
             <div class="col-6">
-                <a href="{{ route('home') }}" class="btn btn-primary max_width_2">
+                <a href="{{ route('home') }}" class="btn btn-primary">
                     <i class="fa fa-{{ Session::get('direction') === 'rtl' ? 'forward' : 'backward' }} px-1"></i>
                     {{ \App\CPU\translate('continue_shopping') }}
                 </a>
@@ -329,7 +290,6 @@
     cartQuantityInitialize();
 
     function set_shipping_id(id, cart_group_id) {
-        
         $.get({
             url: '{{ url('/') }}/customer/set-shipping-method',
             dataType: 'json',
@@ -352,67 +312,25 @@
 <script>
     function checkout() {
         let order_note = $('#order_note').val();
-        let compare_price_1 = $('.compare_price').val();
-        let compare_price = compare_price_1.replace("\u20b9",'');
-        let minimum_cart_value = $('.minimum_cart_value').val();
-        let free_shipping_status = $('.free_shipping_status').val();
         //console.log(order_note);
-        console.log(compare_price, minimum_cart_value, free_shipping_status);
+        $.post({
+            url: "{{ route('order_note') }}",
+            data: {
+                _token: '{{ csrf_token() }}',
+                order_note: order_note,
 
-        if(free_shipping_status == 1){
-            // if(compare_price > minimum_cart_value){
-            //     Swal.fire({
-            //     title: '{{\App\CPU\translate('Wow')}}',
-            //     text: "{{\App\CPU\translate('Congratulation you are eligible for free shipping')}}",
-            //     showCancelButton: false,
-            //     showConfirmButton: false,
-            //     timer: 2000,
-            //     // confirmButtonColor: '#377dff',
-            //     // cancelButtonColor: 'secondary',
-            //     // confirmButtonText: '{{\App\CPU\translate('Yes, Change it')}}!'
-            // }).then((result) => {
-                        $.post({
-                            url: "{{ route('order_note') }}",
-                            data: {
-                                _token: '{{ csrf_token() }}',
-                                order_note: order_note,
+            },
+            beforeSend: function() {
+                $('#loading').show();
+            },
+            success: function(data) {
+                let url = "{{ route('checkout-details') }}";
+                location.href = url;
 
-                            },
-                            beforeSend: function() {
-                                $('#loading').show();
-                            },
-                            success: function(data) {
-                                let url = "{{ route('checkout-details') }}";
-                                location.href = url;
-
-                            },
-                            complete: function() {
-                                $('#loading').hide();
-                            },
-                });
-            // })
-            // }
-        }else{
-                    $.post({
-                            url: "{{ route('order_note') }}",
-                            data: {
-                                _token: '{{ csrf_token() }}',
-                                order_note: order_note,
-
-                            },
-                            beforeSend: function() {
-                                $('#loading').show();
-                            },
-                            success: function(data) {
-                                let url = "{{ route('checkout-details') }}";
-                                location.href = url;
-
-                            },
-                            complete: function() {
-                                $('#loading').hide();
-                            },
-                });
-        }
-        
+            },
+            complete: function() {
+                $('#loading').hide();
+            },
+        });
     }
 </script>

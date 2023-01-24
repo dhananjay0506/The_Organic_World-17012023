@@ -234,11 +234,11 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'as' => 'admin.'], fu
                 Route::get('report', 'CustomerLoyaltyController@report')->name('report');
             });
 
-          
+
 
         });
 
-          // City 
+          // City
 
           Route::group(['prefix' => 'city', 'as' => 'city.'], function () {
             Route::get('view', 'CityController@index')->name('view');
@@ -249,9 +249,9 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'as' => 'admin.'], fu
             Route::post('delete', 'CityController@delete')->name('delete');
         });
 
-     // City 
+     // City
 
-   
+
 
         ///Report
         Route::group(['prefix' => 'report', 'as' => 'report.' ,'middleware'=>['module:report']], function () {
@@ -479,6 +479,7 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'as' => 'admin.'], fu
         //order management
         Route::group(['prefix' => 'orders', 'as' => 'orders.','middleware'=>['module:order_management']], function () {
             Route::get('list/{status}', 'OrderController@list')->name('list');
+            Route::get('tomarowlist/{status}', 'OrderController@tomarowlist')->name('tomarowlist');
             Route::get('details/{id}', 'OrderController@details')->name('details');
             Route::post('status', 'OrderController@status')->name('status');
             Route::post('payment-status', 'OrderController@payment_status')->name('payment-status');
