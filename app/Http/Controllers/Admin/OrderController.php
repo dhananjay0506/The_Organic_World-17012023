@@ -206,7 +206,7 @@ class OrderController extends Controller
                 }
                 $output['salesOrder']->orderItems = $orderItems;
 
-                return json_encode($output);
+                // return json_encode($output);
 
                 $ch = curl_init();
 
