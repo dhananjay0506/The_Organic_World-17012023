@@ -30,6 +30,7 @@ use function App\CPU\translate;
 use App\CPU\CustomerManager;
 use App\CPU\Convert;
 use Rap2hpoutre\FastExcel\FastExcel;
+use App\Model\SalesOrderLog;
 
 class OrderController extends Controller
 {
@@ -197,12 +198,10 @@ class OrderController extends Controller
                 if($tax != 0){
                     $output['salesOrder']->orderDiscPerc = $discount / count($orderItems);
                     $output['salesOrder']->totalTaxAmount = ($output['salesOrder']->totalAmount*($tax/count($orderItems)))/100;
-
                 }
                 else{
                     $output['salesOrder']->orderDiscPerc = 0;
                     $output['salesOrder']->totalTaxAmount = 0;
-
                 }
                 $output['salesOrder']->orderItems = $orderItems;
 
@@ -225,10 +224,22 @@ class OrderController extends Controller
                 $response = json_encode($response);
                 // return $response;
                 if($response == 'false'){
-                     $failed[] =  $output['salesOrder']->shippingId;
+                    $failed[] =  $output['salesOrder']->shippingId;
+                    $salesorderlog =  new SalesOrderLog;
+                    $salesorderlog -> order_id = $output['salesOrder']->shippingId;
+                    $salesorderlog -> status = 0;
+                    $salesorderlog -> created_at = now();
+                    $salesorderlog -> updated_at = now();
+                    $salesorderlog -> save();
                 }
                 else{
                     $success[] = $output['salesOrder']->shippingId;
+                    $salesorderlog =  new SalesOrderLog;
+                    $salesorderlog -> order_id = $output['salesOrder']->shippingId;
+                    $salesorderlog -> status = 1;
+                    $salesorderlog -> created_at = now();
+                    $salesorderlog -> updated_at = now();
+                    $salesorderlog -> save();
                 }
             }
 
